@@ -1,9 +1,13 @@
 module Main where
 
 import Brick
+import System.Environment (getArgs)
 
-ui :: Widget ()
-ui = str "Hello, world!!! :o"
+ui :: String -> Widget ()
+ui = str
 
 main :: IO ()
-main = simpleMain ui
+main = do
+  args <- getArgs
+  texts <- mapM readFile args
+  mapM_ (simpleMain . ui) texts
