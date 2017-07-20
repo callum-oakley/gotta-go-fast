@@ -9,5 +9,6 @@ executable gotta-go-fast
   main-is:             Main.hs
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
-                     , brick
+                     , brick >=0.20
+                     , vty
   default-language:    Haskell2010
