@@ -10,5 +10,6 @@ executable gotta-go-fast
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
                      , brick >=0.20
+                     , time
                      , vty
   default-language:    Haskell2010

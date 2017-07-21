@@ -3,6 +3,7 @@ module Main where
 import Brick
 import Brick.Widgets.Center (center)
 import Data.Monoid ((<>))
+import Data.Time (getCurrentTime, UTCTime)
 import Graphics.Vty
   ( Event(..)
   , Key(..)
@@ -20,7 +21,7 @@ type Name = ()
 -- to be unnecessary.
 data RelativeLocation = BeforeCursor | AfterCursor
 
-data State = State { target :: String, input :: String }
+data State = State { target :: String, input :: String, start :: UTCTime }
 
 targetAttr :: AttrName
 targetAttr = attrName "target"
@@ -83,12 +84,16 @@ backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
 applyBackspaceWord :: State -> State
 applyBackspaceWord s = s { input = backspaceWord $ input s }
 
+handleEnter :: State -> EventM Name (Next State)
+handleEnter s
+  | cursorRow s < (length $ lines $ target s) - 1 = continue $ applyChar s '\n'
+  | otherwise = continue s -- TODO check for done here!
+
 handleEvent :: State -> BrickEvent Name e -> EventM Name (Next State)
 handleEvent s (VtyEvent (EvKey key [])) = case key of
   KChar c -> continue $ applyChar s c
-  KEnter -> continue $ applyChar s '\n'
+  KEnter -> handleEnter s
   KBS -> continue $ applyBackspace s
-  KEsc -> halt s
   _ -> continue s
 handleEvent s (VtyEvent (EvKey key [MCtrl])) = case key of
   KChar 'w' -> continue $ applyBackspaceWord s
@@ -108,7 +113,9 @@ app = App
   }
 
 run :: String -> IO State
-run t = defaultMain app (State { target = t, input = "" })
+run target = do
+  start <- getCurrentTime
+  defaultMain app (State { target = target, input = "", start = start })
 
 -- TODO use terminal heights and widths here, or make configurable
 strip :: String -> String
