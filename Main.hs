@@ -3,7 +3,7 @@ module Main where
 import Brick
 import Brick.Widgets.Center (center)
 import System.Environment (getArgs)
-import Graphics.Vty (Event(..), Key(..), defAttr)
+import Graphics.Vty (Event(..), Key(..), defAttr, brightBlack, red)
 
 type Name = ()
 
@@ -13,6 +13,12 @@ type Name = ()
 data RelativeLocation = BeforeCursor | AfterCursor
 
 data State = State { target :: String, input :: String }
+
+targetAttr :: AttrName
+targetAttr = attrName "base"
+
+errorAttr :: AttrName
+errorAttr = attrName "error"
 
 cursorCol :: State -> Int
 cursorCol = textWidth . takeWhile (/= '\n') . reverse . input
@@ -24,10 +30,12 @@ cursor :: State -> Location
 cursor s = Location (cursorCol s, cursorRow s)
 
 drawChar :: RelativeLocation -> (Maybe Char, Maybe Char) -> Widget Name
-drawChar _ (Just t, Just i) = if t == i then str [t] else str ['x']
-drawChar BeforeCursor (Just t, Nothing) = str ['x']
-drawChar AfterCursor (Just t, Nothing) = str [t]
-drawChar _ (Nothing, Just i) = str ['x']
+drawChar _ (Just t, Just i)
+  | t == i = str [t]
+  | t /= i = withAttr errorAttr $ str [i]
+drawChar _ (Nothing, Just i) = withAttr errorAttr $ str [i]
+drawChar BeforeCursor (Just t, Nothing) = withAttr errorAttr $ str [t]
+drawChar AfterCursor (Just t, Nothing) = withAttr targetAttr $ str [t]
 
 drawLine :: RelativeLocation -> (String, String) -> Widget Name
 -- We display an empty line as a single space, since str "" takes up no
@@ -70,7 +78,10 @@ app = App
   , appChooseCursor = showFirstCursor
   , appHandleEvent = handleEvent
   , appStartEvent = return
-  , appAttrMap = const $ attrMap defAttr []
+  , appAttrMap = const $ attrMap defAttr
+    [ (targetAttr, fg brightBlack)
+    , (errorAttr, fg red)
+    ]
   }
 
 run :: String -> IO State
