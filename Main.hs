@@ -2,8 +2,16 @@ module Main where
 
 import Brick
 import Brick.Widgets.Center (center)
+import Data.Monoid ((<>))
+import Graphics.Vty
+  ( Event(..)
+  , Key(..)
+  , Modifier(..)
+  , brightBlack
+  , defAttr
+  , red
+  )
 import System.Environment (getArgs)
-import Graphics.Vty (Event(..), Key(..), defAttr, brightBlack, red)
 
 type Name = ()
 
@@ -15,7 +23,7 @@ data RelativeLocation = BeforeCursor | AfterCursor
 data State = State { target :: String, input :: String }
 
 targetAttr :: AttrName
-targetAttr = attrName "base"
+targetAttr = attrName "target"
 
 errorAttr :: AttrName
 errorAttr = attrName "error"
@@ -32,7 +40,8 @@ cursor s = Location (cursorCol s, cursorRow s)
 drawChar :: RelativeLocation -> (Maybe Char, Maybe Char) -> Widget Name
 drawChar _ (Just t, Just i)
   | t == i = str [t]
-  | t /= i = withAttr errorAttr $ str [i]
+  | t /= i && i == ' ' = withAttr errorAttr $ str ['_']
+  | otherwise = withAttr errorAttr $ str [i]
 drawChar _ (Nothing, Just i) = withAttr errorAttr $ str [i]
 drawChar BeforeCursor (Just t, Nothing) = withAttr errorAttr $ str [t]
 drawChar AfterCursor (Just t, Nothing) = withAttr targetAttr $ str [t]
@@ -61,15 +70,31 @@ draw s = pure $ center $ showCursor () (cursor s) $ drawPage s
 applyChar :: State -> Char -> State
 applyChar s c = s { input = input s ++ [c] }
 
-applyBS :: State -> State
-applyBS s = s { input = init $ input s }
+backspace :: String -> String
+backspace "" = ""
+backspace xs = init xs
+
+applyBackspace :: State -> State
+applyBackspace s = s { input = backspace $ input s }
+
+backspaceWord :: String -> String
+backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
+
+applyBackspaceWord :: State -> State
+applyBackspaceWord s = s { input = backspaceWord $ input s }
 
 handleEvent :: State -> BrickEvent Name e -> EventM Name (Next State)
 handleEvent s (VtyEvent (EvKey key [])) = case key of
   KChar c -> continue $ applyChar s c
   KEnter -> continue $ applyChar s '\n'
-  KBS -> continue $ applyBS s
+  KBS -> continue $ applyBackspace s
   KEsc -> halt s
+  _ -> continue s
+handleEvent s (VtyEvent (EvKey key [MCtrl])) = case key of
+  KChar 'w' -> continue $ applyBackspaceWord s
+  KChar 'c' -> halt s
+  KChar 'd' -> halt s
+  _ -> continue s
 handleEvent s _ = continue s
 
 app :: App State e Name
@@ -79,16 +104,19 @@ app = App
   , appHandleEvent = handleEvent
   , appStartEvent = return
   , appAttrMap = const $ attrMap defAttr
-    [ (targetAttr, fg brightBlack)
-    , (errorAttr, fg red)
-    ]
+    [(targetAttr, fg brightBlack), (errorAttr, fg red)]
   }
 
 run :: String -> IO State
 run t = defaultMain app (State { target = t, input = "" })
 
+-- TODO use terminal heights and widths here, or make configurable
+strip :: String -> String
+strip = unlines . take 50 . map (take 80) . lines
+
 main :: IO ()
 main = do
   args <- getArgs
-  targets <- mapM readFile args
+  raw <- mapM readFile args
+  let targets = map strip raw
   mapM_ run targets
