@@ -18,14 +18,14 @@ cursor s = Location (col, row)
 drawChar :: Maybe Char -> Maybe Char -> Widget Name
 drawChar (Just t) (Just i)
   | t == i = str [t]
-  | t /= i = str ['X']
+  | t /= i = str [i] -- red
 drawChar (Just t) Nothing = str [t]
-drawChar Nothing (Just i) = str ['Y']
+drawChar Nothing (Just i) = str [i] -- red
 
 drawLine :: String -> String -> Widget Name
 -- We display an empty line as a single space, since str "" takes up no
 -- vertical space.
-drawLine "" _ = str " "
+drawLine "" "" = str " "
 drawLine ts is = foldl (<+>) emptyWidget charWidgets
   where
     charWidgets = take maxLen $ zipWith drawChar (wrap ts) (wrap is)
