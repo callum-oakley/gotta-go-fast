@@ -15,11 +15,32 @@ cursor s = Location (col, row)
     col = textWidth $ takeWhile (/= '\n') $ reverse $ input s
     row = length $ filter (== '\n') $ input s
 
-page :: State -> Widget Name
-page s = str $ target s -- TODO split page in to semantic str widgets
+drawChar :: Maybe Char -> Maybe Char -> Widget Name
+drawChar (Just t) (Just i)
+  | t == i = str [t]
+  | t /= i = str ['X']
+drawChar (Just t) Nothing = str [t]
+drawChar Nothing (Just i) = str ['Y']
+
+drawLine :: String -> String -> Widget Name
+-- We display an empty line as a single space, since str "" takes up no
+-- vertical space.
+drawLine "" _ = str " "
+drawLine ts is = foldl (<+>) emptyWidget charWidgets
+  where
+    charWidgets = take maxLen $ zipWith drawChar (wrap ts) (wrap is)
+    wrap x = map Just x ++ repeat Nothing
+    maxLen = max (length ts) (length is)
+
+drawPage :: State -> Widget Name
+drawPage s = foldl (<=>) emptyWidget $ lineWidgets
+  where
+    lineWidgets = zipWith drawLine targetLines (inputLines ++ repeat "")
+    targetLines = lines $ target s
+    inputLines = lines $ input s
 
 draw :: State -> [Widget Name]
-draw s = [center $ showCursor () (cursor s) $ page s]
+draw s = pure $ center $ showCursor () (cursor s) $ drawPage s
 
 applyChar :: State -> Char -> State
 applyChar s c = s { input = input s ++ [c] }
@@ -44,9 +65,11 @@ app = App
   , appAttrMap = const $ attrMap defAttr []
   }
 
+run :: String -> IO State
+run t = defaultMain app (State { target = t, input = "" })
+
 main :: IO ()
 main = do
   args <- getArgs
-  texts <- mapM readFile args
-  finalState <- defaultMain app (State { target = head texts, input = "" })
-  return ()
+  targets <- mapM readFile args
+  mapM_ run targets
