@@ -7,37 +7,45 @@ import Graphics.Vty (Event(..), Key(..), defAttr)
 
 type Name = ()
 
+-- It is often useful to know whether the line / character etc we are
+-- considering is "BeforeCursor" or "AfterCursor". More granularity turns out
+-- to be unnecessary.
+data RelativeLocation = BeforeCursor | AfterCursor
+
 data State = State { target :: String, input :: String }
 
+cursorCol :: State -> Int
+cursorCol = textWidth . takeWhile (/= '\n') . reverse . input
+
+cursorRow :: State -> Int
+cursorRow = length . filter (== '\n') . input
+
 cursor :: State -> Location
-cursor s = Location (col, row)
-  where
-    col = textWidth $ takeWhile (/= '\n') $ reverse $ input s
-    row = length $ filter (== '\n') $ input s
+cursor s = Location (cursorCol s, cursorRow s)
 
-drawChar :: Maybe Char -> Maybe Char -> Widget Name
-drawChar (Just t) (Just i)
-  | t == i = str [t]
-  | t /= i = str [i] -- red
-drawChar (Just t) Nothing = str [t]
-drawChar Nothing (Just i) = str [i] -- red
+drawChar :: RelativeLocation -> (Maybe Char, Maybe Char) -> Widget Name
+drawChar _ (Just t, Just i) = if t == i then str [t] else str ['x']
+drawChar BeforeCursor (Just t, Nothing) = str ['x']
+drawChar AfterCursor (Just t, Nothing) = str [t]
+drawChar _ (Nothing, Just i) = str ['x']
 
-drawLine :: String -> String -> Widget Name
+drawLine :: RelativeLocation -> (String, String) -> Widget Name
 -- We display an empty line as a single space, since str "" takes up no
--- vertical space.
-drawLine "" "" = str " "
-drawLine ts is = foldl (<+>) emptyWidget charWidgets
+-- vertical space. This doesn't affect input in any way.
+drawLine _ ("", "") = str " "
+drawLine rl (ts, is) = foldl (<+>) emptyWidget charWidgets
   where
-    charWidgets = take maxLen $ zipWith drawChar (wrap ts) (wrap is)
-    wrap x = map Just x ++ repeat Nothing
+    charWidgets = map (drawChar rl) charPairs
+    charPairs = take maxLen $ zip (nothingsForever ts) (nothingsForever is)
+    nothingsForever x = map Just x ++ repeat Nothing
     maxLen = max (length ts) (length is)
 
 drawPage :: State -> Widget Name
-drawPage s = foldl (<=>) emptyWidget $ lineWidgets
+drawPage s = foldl (<=>) emptyWidget $ lineWidgetsBC ++ lineWidgetsAC
   where
-    lineWidgets = zipWith drawLine targetLines (inputLines ++ repeat "")
-    targetLines = lines $ target s
-    inputLines = lines $ input s
+    lineWidgetsBC = map (drawLine BeforeCursor) $ take (cursorRow s) linePairs
+    lineWidgetsAC = map (drawLine AfterCursor) $ drop (cursorRow s) linePairs
+    linePairs = zip (lines $ target s) ((lines $ input s) ++ repeat "")
 
 draw :: State -> [Widget Name]
 draw s = pure $ center $ showCursor () (cursor s) $ drawPage s
