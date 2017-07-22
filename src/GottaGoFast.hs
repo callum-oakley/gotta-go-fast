@@ -52,13 +52,19 @@ onLastLine s = cursorRow s + 1 == length (lines $ target s)
 isHit :: State -> Char -> Bool
 isHit s c = (input s ++ [c]) `isPrefixOf` target s
 
--- TODO auto tab at start of lines
 applyChar :: Char -> State -> State
 applyChar c s = s
   { input = input s ++ [c]
   , strokes = strokes s + 1
   , hits = hits s + if isHit s c then 1 else 0
   }
+
+applyEnter :: State -> State
+applyEnter s = s' { input = input s' ++ leadingSpaces }
+  where
+    s' = applyChar '\n' s
+    leadingSpaces = replicate n ' '
+    n = length $ takeWhile (== ' ') $ lines (target s') !! cursorRow s'
 
 backspace :: String -> String
 backspace "" = ""

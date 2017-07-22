@@ -53,7 +53,7 @@ draw s
 handleEnter :: State -> EventM Name (Next State)
 handleEnter s
   | hasEnded s = halt s
-  | not $ onLastLine s = continue $ applyChar '\n' s
+  | not $ onLastLine s = continue $ applyEnter s
   | input s ++ "\n" == target s = do
     now <- liftIO getCurrentTime
     continue $ stopClock now s
