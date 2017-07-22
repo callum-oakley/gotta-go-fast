@@ -59,12 +59,14 @@ applyChar c s = s
   , hits = hits s + if isHit s c then 1 else 0
   }
 
-applyEnter :: State -> State
-applyEnter s = s' { input = input s' ++ leadingSpaces }
+indent :: State -> State
+indent s = s { input = input s ++ leadingSpaces }
   where
-    s' = applyChar '\n' s
     leadingSpaces = replicate n ' '
-    n = length $ takeWhile (== ' ') $ lines (target s') !! cursorRow s'
+    n = length $ takeWhile (== ' ') $ lines (target s) !! cursorRow s
+
+applyEnter :: State -> State
+applyEnter = indent . applyChar '\n'
 
 backspace :: String -> String
 backspace "" = ""
@@ -80,7 +82,7 @@ applyBackspaceWord :: State -> State
 applyBackspaceWord s = s { input = backspaceWord $ input s }
 
 initialState :: String -> State
-initialState t = State
+initialState t = indent $ State
   { target = t
   , input = ""
   , start = Nothing
