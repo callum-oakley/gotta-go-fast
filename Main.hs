@@ -1,9 +1,18 @@
 module Main where
 
+import Debug.Trace
+
 import Brick
 import Brick.Widgets.Center (center)
+import Data.Maybe (isJust, fromJust)
 import Data.Monoid ((<>))
-import Data.Time (getCurrentTime, UTCTime)
+import Data.Time
+  ( NominalDiffTime
+  , UTCTime
+  , diffTimeToPicoseconds
+  , diffUTCTime
+  , getCurrentTime
+  )
 import Graphics.Vty
   ( Event(..)
   , Key(..)
@@ -12,6 +21,7 @@ import Graphics.Vty
   , defAttr
   , red
   )
+import Control.Monad.IO.Class (liftIO)
 import System.Environment (getArgs)
 
 type Name = ()
@@ -21,13 +31,23 @@ type Name = ()
 -- to be unnecessary.
 data RelativeLocation = BeforeCursor | AfterCursor
 
-data State = State { target :: String, input :: String, start :: UTCTime }
+data State = State
+  { target :: String
+  , input :: String
+  , start :: UTCTime
+  , end :: Maybe UTCTime
+  , strokes :: Integer
+  , hits :: Integer
+  }
 
 targetAttr :: AttrName
 targetAttr = attrName "target"
 
 errorAttr :: AttrName
 errorAttr = attrName "error"
+
+isDone :: State -> Bool
+isDone = isJust . end
 
 cursorCol :: State -> Int
 cursorCol = textWidth . takeWhile (/= '\n') . reverse . input
@@ -38,12 +58,15 @@ cursorRow = length . filter (== '\n') . input
 cursor :: State -> Location
 cursor s = Location (cursorCol s, cursorRow s)
 
+visibleSpace :: Char -> Char
+visibleSpace ' ' = '_'
+visibleSpace c = c
+
 drawChar :: RelativeLocation -> (Maybe Char, Maybe Char) -> Widget Name
 drawChar _ (Just t, Just i)
   | t == i = str [t]
-  | t /= i && i == ' ' = withAttr errorAttr $ str ['_']
-  | otherwise = withAttr errorAttr $ str [i]
-drawChar _ (Nothing, Just i) = withAttr errorAttr $ str [i]
+  | t /= i = withAttr errorAttr $ str [visibleSpace i]
+drawChar _ (Nothing, Just i) = withAttr errorAttr $ str [visibleSpace i]
 drawChar BeforeCursor (Just t, Nothing) = withAttr errorAttr $ str [t]
 drawChar AfterCursor (Just t, Nothing) = withAttr targetAttr $ str [t]
 
@@ -65,11 +88,32 @@ drawPage s = foldl (<=>) emptyWidget $ lineWidgetsBC ++ lineWidgetsAC
     lineWidgetsAC = map (drawLine AfterCursor) $ drop (cursorRow s) linePairs
     linePairs = zip (lines $ target s) ((lines $ input s) ++ repeat "")
 
+minutes :: NominalDiffTime -> Rational
+minutes = (/ 60) . toRational
+
+drawResults :: State -> Widget Name
+drawResults s =
+  (str $ "Words per minute: " ++ show (round wpm)) <=>
+  (str $ "        Accuracy: " ++ show (round accuracy) ++ "%")
+  where
+    wpm = (fromIntegral $ length $ target s) / (5 * mins)
+    mins = minutes $ diffUTCTime (fromJust $ end s) (start s)
+    accuracy = (fromIntegral $ hits s) / (fromIntegral $ strokes s) * 100
+
 draw :: State -> [Widget Name]
-draw s = pure $ center $ showCursor () (cursor s) $ drawPage s
+draw s
+  | isDone s = pure $ center $ drawResults s
+  | otherwise = pure $ center $ showCursor () (cursor s) $ drawPage s
+
+isHit :: State -> Char -> Bool
+isHit s c = (head $ drop (length $ input s) $ target s) == c
 
 applyChar :: State -> Char -> State
-applyChar s c = s { input = input s ++ [c] }
+applyChar s c = s
+  { input = input s ++ [c]
+  , strokes = strokes s + 1
+  , hits = hits s + if isHit s c then 1 else 0
+  }
 
 backspace :: String -> String
 backspace "" = ""
@@ -86,8 +130,12 @@ applyBackspaceWord s = s { input = backspaceWord $ input s }
 
 handleEnter :: State -> EventM Name (Next State)
 handleEnter s
+  | isDone s = halt s
   | cursorRow s < (length $ lines $ target s) - 1 = continue $ applyChar s '\n'
-  | otherwise = continue s -- TODO check for done here!
+  | (input s) ++ "\n" == target s = do
+    now <- liftIO getCurrentTime
+    continue $ s { end = Just now }
+  | otherwise = continue s
 
 handleEvent :: State -> BrickEvent Name e -> EventM Name (Next State)
 handleEvent s (VtyEvent (EvKey key [])) = case key of
@@ -112,18 +160,31 @@ app = App
     [(targetAttr, fg brightBlack), (errorAttr, fg red)]
   }
 
+initialState :: String -> UTCTime -> State
+initialState target start = State
+  { target = target
+  , input = ""
+  , start = start
+  , end = Nothing
+  , strokes = 0
+  , hits = 0
+  }
+
 run :: String -> IO State
 run target = do
-  start <- getCurrentTime
-  defaultMain app (State { target = target, input = "", start = start })
+  now <- getCurrentTime
+  defaultMain app (initialState target now)
 
 -- TODO use terminal heights and widths here, or make configurable
+-- TODO wrap lines instead of trimming them
+-- TODO take a random sample, not just the first n lines
 strip :: String -> String
-strip = unlines . take 50 . map (take 80) . lines
+strip = unlines . take 30 . map (take 80) . lines
 
 main :: IO ()
 main = do
   args <- getArgs
+  -- TODO open a random file in the directory if none are given
   raw <- mapM readFile args
   let targets = map strip raw
   mapM_ run targets
