@@ -71,7 +71,7 @@ backspace "" = ""
 backspace xs = init xs
 
 applyBackspace :: State -> State
-applyBackspace s = s {input = backspace $ input s}
+applyBackspace s = s { input = backspace $ input s }
 
 backspaceWord :: String -> String
 backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
