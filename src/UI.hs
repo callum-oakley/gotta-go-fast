@@ -7,8 +7,7 @@ import Brick
   )
 import Brick.Widgets.Center (center)
 import Control.Monad.IO.Class (liftIO)
-import Data.Maybe (fromJust)
-import Data.Time (diffUTCTime, getCurrentTime)
+import Data.Time (getCurrentTime)
 import Graphics.Vty
   (Event(..), Key(..), Modifier(..), brightBlack, defAttr, red)
 
@@ -16,55 +15,35 @@ import GottaGoFast
 
 type Name = ()
 
-targetAttr :: AttrName
-targetAttr = attrName "target"
+emptyAttr :: AttrName
+emptyAttr = attrName "target"
 
-errorAttr :: AttrName
-errorAttr = attrName "error"
+missAttr :: AttrName
+missAttr = attrName "error"
 
-visibleSpace :: Char -> Char
-visibleSpace ' ' = '_'
-visibleSpace c  = c
+drawCharacter :: Character -> Widget Name
+drawCharacter (Hit c) = str [c]
+drawCharacter (Miss ' ') = withAttr missAttr $ str ['_']
+drawCharacter (Miss c) = withAttr missAttr $ str [c]
+drawCharacter (Empty c) = withAttr emptyAttr $ str [c]
 
-drawChar :: RelativeLocation -> (Maybe Char, Maybe Char) -> Widget Name
-drawChar _ (Just t, Just i)
-  | t == i = str [t]
-  | t /= i = withAttr errorAttr $ str [visibleSpace i]
-drawChar _ (Nothing, Just i) = withAttr errorAttr $ str [visibleSpace i]
-drawChar BeforeCursor (Just t, Nothing) = withAttr errorAttr $ str [t]
-drawChar AfterCursor (Just t, Nothing) = withAttr targetAttr $ str [t]
-
-drawLine :: RelativeLocation -> (String, String) -> Widget Name
--- We display an empty line as a single space, since str "" takes up no
--- vertical space. This doesn't affect input in any way.
-drawLine _ ("", "") = str " "
-drawLine rl (ts, is) = foldl (<+>) emptyWidget charWidgets
-  where
-    charWidgets = map (drawChar rl) charPairs
-    charPairs = take maxLen $ zip (nothingsForever ts) (nothingsForever is)
-    nothingsForever x = map Just x ++ repeat Nothing
-    maxLen = max (length ts) (length is)
+drawLine :: Line -> Widget Name
+-- We display an empty line as a single space so that it still occupies
+-- vertical space.
+drawLine [] = str " "
+drawLine ls = foldl1 (<+>) $ map drawCharacter ls
 
 drawPage :: State -> Widget Name
-drawPage s = foldl (<=>) emptyWidget $ lineWidgetsBC ++ lineWidgetsAC
-  where
-    lineWidgetsBC = map (drawLine BeforeCursor) $ take (cursorRow s) linePairs
-    lineWidgetsAC = map (drawLine AfterCursor) $ drop (cursorRow s) linePairs
-    linePairs = zip (lines $ target s) (lines (input s) ++ repeat "")
+drawPage s = foldl (<=>) emptyWidget $ map drawLine $ page s
 
 drawResults :: State -> Widget Name
-drawResults s =
-  str ("You typed " ++ x ++ " characters in " ++ y ++ " seconds.") <=>
-  str " " <=>
-  str ("Words per minute: " ++ show (round wpm)) <=>
-  str " " <=>
-  str ("Accuracy: " ++ show (round accuracy) ++ "%")
+drawResults s = str $
+  "You typed " ++ x ++ " characters in " ++ y ++ " seconds.\n\n" ++
+  "Words per minute: " ++ show (round $ wpm s) ++ "\n\n" ++
+  "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
   where
     x = show $ length $ target s
-    y = show $ round seconds
-    wpm = fromIntegral (length $ target s) / (5 * seconds / 60)
-    seconds = toRational $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
-    accuracy = fromIntegral (hits s) / fromIntegral (strokes s) * 100
+    y = show $ round $ seconds s
 
 draw :: State -> [Widget Name]
 draw s
@@ -74,7 +53,7 @@ draw s
 handleEnter :: State -> EventM Name (Next State)
 handleEnter s
   | hasEnded s = halt s
-  | cursorRow s < length (lines $ target s) - 1 = continue $ applyChar '\n' s
+  | not $ onLastLine s = continue $ applyChar '\n' s
   | input s ++ "\n" == target s = do
     now <- liftIO getCurrentTime
     continue $ stopClock now s
@@ -109,7 +88,7 @@ app = App
   , appHandleEvent = handleEvent
   , appStartEvent = return
   , appAttrMap = const $
-      attrMap defAttr [(targetAttr, fg brightBlack), (errorAttr, fg red)]
+      attrMap defAttr [(emptyAttr, fg brightBlack), (missAttr, fg red)]
   }
 
 run :: String -> IO ()
