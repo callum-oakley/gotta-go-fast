@@ -18,6 +18,12 @@ data State = State
   , hits    :: Integer
   }
 
+startClock :: UTCTime -> State -> State
+startClock now s = s { start = Just now }
+
+stopClock :: UTCTime -> State -> State
+stopClock now s = s { end = Just now }
+
 hasEnded :: State -> Bool
 hasEnded = isJust . end
 

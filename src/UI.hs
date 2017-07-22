@@ -77,7 +77,7 @@ handleEnter s
   | cursorRow s < length (lines $ target s) - 1 = continue $ applyChar '\n' s
   | input s ++ "\n" == target s = do
     now <- liftIO getCurrentTime
-    continue $ s {end = Just now}
+    continue $ stopClock now s
   | otherwise = continue s
 
 handleChar :: Char -> State -> EventM Name (Next State)
@@ -85,7 +85,7 @@ handleChar c s
   | hasStarted s = continue $ applyChar c s
   | otherwise = do
     now <- liftIO getCurrentTime
-    continue $ applyChar c $ s {start = Just now}
+    continue $ applyChar c $ startClock now s
 
 handleEvent :: State -> BrickEvent Name e -> EventM Name (Next State)
 handleEvent s (VtyEvent (EvKey key [])) =
