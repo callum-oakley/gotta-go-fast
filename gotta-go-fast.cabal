@@ -6,10 +6,15 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable gotta-go-fast
+  hs-source-dirs:      src
+  other-modules:       GottaGoFast
+                     , UI
   main-is:             Main.hs
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
                      , brick >=0.20
+                     , directory
+                     , random
                      , time
                      , vty
   default-language:    Haskell2010
