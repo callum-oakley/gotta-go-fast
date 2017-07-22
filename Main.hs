@@ -4,6 +4,7 @@ import Debug.Trace
 
 import Brick
 import Brick.Widgets.Center (center)
+import Data.List (isPrefixOf)
 import Data.Maybe (isJust, fromJust)
 import Data.Monoid ((<>))
 import Data.Time
@@ -34,7 +35,7 @@ data RelativeLocation = BeforeCursor | AfterCursor
 data State = State
   { target :: String
   , input :: String
-  , start :: UTCTime
+  , start :: Maybe UTCTime
   , end :: Maybe UTCTime
   , strokes :: Integer
   , hits :: Integer
@@ -46,8 +47,11 @@ targetAttr = attrName "target"
 errorAttr :: AttrName
 errorAttr = attrName "error"
 
-isDone :: State -> Bool
-isDone = isJust . end
+hasEnded :: State -> Bool
+hasEnded = isJust . end
+
+hasStarted :: State -> Bool
+hasStarted = isJust . start
 
 cursorCol :: State -> Int
 cursorCol = textWidth . takeWhile (/= '\n') . reverse . input
@@ -88,28 +92,30 @@ drawPage s = foldl (<=>) emptyWidget $ lineWidgetsBC ++ lineWidgetsAC
     lineWidgetsAC = map (drawLine AfterCursor) $ drop (cursorRow s) linePairs
     linePairs = zip (lines $ target s) ((lines $ input s) ++ repeat "")
 
-minutes :: NominalDiffTime -> Rational
-minutes = (/ 60) . toRational
-
 drawResults :: State -> Widget Name
 drawResults s =
+  (str $ "You typed " ++ x ++ " characters in " ++ y ++ " seconds.") <=>
+  (str " ") <=>
   (str $ "Words per minute: " ++ show (round wpm)) <=>
-  (str $ "        Accuracy: " ++ show (round accuracy) ++ "%")
+  (str " ") <=>
+  (str $ "Accuracy: " ++ show (round accuracy) ++ "%")
   where
-    wpm = (fromIntegral $ length $ target s) / (5 * mins)
-    mins = minutes $ diffUTCTime (fromJust $ end s) (start s)
+    x = show $ length $ target s
+    y = show $ round seconds
+    wpm = (fromIntegral $ length $ target s) / (5 * seconds / 60)
+    seconds = toRational $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
     accuracy = (fromIntegral $ hits s) / (fromIntegral $ strokes s) * 100
 
 draw :: State -> [Widget Name]
 draw s
-  | isDone s = pure $ center $ drawResults s
+  | hasEnded s = pure $ center $ drawResults s
   | otherwise = pure $ center $ showCursor () (cursor s) $ drawPage s
 
 isHit :: State -> Char -> Bool
-isHit s c = (head $ drop (length $ input s) $ target s) == c
+isHit s c = isPrefixOf (input s ++ [c]) (target s)
 
-applyChar :: State -> Char -> State
-applyChar s c = s
+applyChar :: Char -> State -> State
+applyChar c s = s
   { input = input s ++ [c]
   , strokes = strokes s + 1
   , hits = hits s + if isHit s c then 1 else 0
@@ -130,16 +136,23 @@ applyBackspaceWord s = s { input = backspaceWord $ input s }
 
 handleEnter :: State -> EventM Name (Next State)
 handleEnter s
-  | isDone s = halt s
-  | cursorRow s < (length $ lines $ target s) - 1 = continue $ applyChar s '\n'
+  | hasEnded s = halt s
+  | cursorRow s < (length $ lines $ target s) - 1 = continue $ applyChar '\n' s
   | (input s) ++ "\n" == target s = do
     now <- liftIO getCurrentTime
     continue $ s { end = Just now }
   | otherwise = continue s
 
+handleChar :: Char -> State -> EventM Name (Next State)
+handleChar c s
+  | hasStarted s = continue $ applyChar c s
+  | otherwise = do
+    now <- liftIO getCurrentTime
+    continue $ applyChar c $ s { start = Just now }
+
 handleEvent :: State -> BrickEvent Name e -> EventM Name (Next State)
 handleEvent s (VtyEvent (EvKey key [])) = case key of
-  KChar c -> continue $ applyChar s c
+  KChar c -> handleChar c s
   KEnter -> handleEnter s
   KBS -> continue $ applyBackspace s
   _ -> continue s
@@ -160,20 +173,15 @@ app = App
     [(targetAttr, fg brightBlack), (errorAttr, fg red)]
   }
 
-initialState :: String -> UTCTime -> State
-initialState target start = State
+initialState :: String -> State
+initialState target = State
   { target = target
   , input = ""
-  , start = start
+  , start = Nothing
   , end = Nothing
   , strokes = 0
   , hits = 0
   }
-
-run :: String -> IO State
-run target = do
-  now <- getCurrentTime
-  defaultMain app (initialState target now)
 
 -- TODO use terminal heights and widths here, or make configurable
 -- TODO wrap lines instead of trimming them
@@ -187,4 +195,4 @@ main = do
   -- TODO open a random file in the directory if none are given
   raw <- mapM readFile args
   let targets = map strip raw
-  mapM_ run targets
+  mapM_ (defaultMain app . initialState) targets
