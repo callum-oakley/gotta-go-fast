@@ -1,8 +1,7 @@
 # Gotta Go Fast
 
 A command line utility for measuring your wpm and accuracy typing a given file.
-
-![Like this.](img/gits.gif)
+Written with [brick](https://github.com/jtdaugherty/brick).
 
 ## Install
 
