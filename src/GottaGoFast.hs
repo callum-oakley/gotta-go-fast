@@ -49,15 +49,13 @@ cursor s = (cursorCol s, cursorRow s)
 onLastLine :: State -> Bool
 onLastLine s = cursorRow s + 1 == length (lines $ target s)
 
-isHit :: State -> Char -> Bool
-isHit s c = (input s ++ [c]) `isPrefixOf` target s
+isErrorFree :: State -> Bool
+isErrorFree s = input s `isPrefixOf` target s
 
 applyChar :: Char -> State -> State
-applyChar c s = s
-  { input = input s ++ [c]
-  , strokes = strokes s + 1
-  , hits = hits s + if isHit s c then 1 else 0
-  }
+applyChar c s = s' { hits = hits s' + if isErrorFree s' then 1 else 0 }
+  where
+    s' = s { input = input s ++ [c] , strokes = strokes s + 1 }
 
 indent :: State -> State
 indent s = s { input = input s ++ drop (cursorCol s) leadingSpaces }

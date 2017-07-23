@@ -2,9 +2,10 @@ module UI where
 
 import Brick
   ( App(..), AttrName, BrickEvent(..), EventM, Location(..), Next, Widget
-  , attrMap, attrName, continue, defaultMain, emptyWidget, fg, halt, showCursor
-  , showFirstCursor, str, withAttr, (<+>), (<=>)
+  , attrMap, attrName, continue, defaultMain, emptyWidget, fg, halt, padAll
+  , showCursor, showFirstCursor, str, withAttr, (<+>), (<=>)
   )
+import Brick.Widgets.Border (border, borderAttr)
 import Brick.Widgets.Center (center)
 import Control.Monad.IO.Class (liftIO)
 import Data.Time (getCurrentTime)
@@ -46,7 +47,10 @@ drawResults s = str $
 draw :: State -> [Widget ()]
 draw s
   | hasEnded s = pure $ center $ drawResults s
-  | otherwise = pure $ center $ showCursor () (Location $ cursor s) $ drawPage s
+  | isErrorFree s = pure $ center p
+  | otherwise = pure $ center $ border p
+  where
+    p = padAll 1 $ showCursor () (Location $ cursor s) $ drawPage s
 
 handleEnter :: State -> EventM () (Next State)
 handleEnter s
@@ -86,8 +90,8 @@ app = App
   , appChooseCursor = showFirstCursor
   , appHandleEvent = handleEvent
   , appStartEvent = return
-  , appAttrMap = const $
-      attrMap defAttr [(emptyAttr, fg brightBlack), (missAttr, fg red)]
+  , appAttrMap = const $ attrMap defAttr
+    [(emptyAttr, fg brightBlack), (missAttr, fg red), (borderAttr, fg red)]
   }
 
 run :: String -> IO ()
