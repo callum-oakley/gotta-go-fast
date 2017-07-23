@@ -30,6 +30,8 @@ ensureEndWithNewline s
   | last s == '\n' = s
   | otherwise = s ++ "\n"
 
+-- TODO Replace this atrocity with a library function (which is currently
+-- buggy, need to submit a PR).
 wrapAt :: Int -> String -> String
 wrapAt n = result . foldl greedy ("", "", "", "") . ensureEndWithNewline
   where
