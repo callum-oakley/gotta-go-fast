@@ -1,6 +1,6 @@
 # Gotta Go Fast
 
-A command line utility for measuring your wpm and accuracy typing a given file.
+A command line utility for measuring your WPM and accuracy typing a given file.
 Written with [brick](https://github.com/jtdaugherty/brick).
 
 ## Install
