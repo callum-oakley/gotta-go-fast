@@ -1,4 +1,7 @@
-module WordWrap (wrapAt) where
+module FormatCode (expandTabs, wordWrap) where
+
+expandTabs :: Int -> String -> String
+expandTabs n = concatMap (\c -> if c == '\t' then replicate n ' ' else [c])
 
 getIndent :: String -> String
 getIndent = takeWhile (== ' ')
@@ -11,8 +14,8 @@ ensureEndWithNewline s
 
 -- TODO Replace this atrocity with a library function (which is currently
 -- buggy, need to submit a PR).
-wrapAt :: Int -> String -> String
-wrapAt n = result . foldl greedy ("", "", "", "") . ensureEndWithNewline
+wordWrap :: Int -> String -> String
+wordWrap n = result . foldl greedy ("", "", "", "") . ensureEndWithNewline
   where
     result (acc, _, _, _) = acc
     greedy (acc, l, s, w) '\n'

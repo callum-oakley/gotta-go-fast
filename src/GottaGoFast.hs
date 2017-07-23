@@ -60,10 +60,9 @@ applyChar c s = s
   }
 
 indent :: State -> State
-indent s = s { input = input s ++ leadingSpaces }
+indent s = s { input = input s ++ drop (cursorCol s) leadingSpaces }
   where
-    leadingSpaces = replicate n ' '
-    n = length $ takeWhile (== ' ') $ lines (target s) !! cursorRow s
+    leadingSpaces = takeWhile (== ' ') $ lines (target s) !! cursorRow s
 
 applyEnter :: State -> State
 applyEnter = indent . applyChar '\n'

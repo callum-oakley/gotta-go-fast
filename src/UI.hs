@@ -67,6 +67,7 @@ handleChar c s
 handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
 handleEvent s (VtyEvent (EvKey key [])) =
   case key of
+    KChar '\t' -> continue $ indent s
     KChar c -> handleChar c s
     KEnter -> handleEnter s
     KBS -> continue $ applyBackspace s
