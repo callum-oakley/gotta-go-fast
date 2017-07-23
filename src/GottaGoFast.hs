@@ -94,7 +94,7 @@ initialState t = indent State
 character :: Position -> (Maybe Char, Maybe Char) -> Character
 character _ (Just t, Just i)
   | t == i = Hit t
-  | t /= i = Miss t
+  | t /= i = Miss i
 character _ (Nothing, Just i) = Miss i
 character BeforeCursor (Just t, Nothing) = Miss t
 character AfterCursor (Just t, Nothing) = Empty t
