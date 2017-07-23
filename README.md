@@ -23,7 +23,6 @@ Errors are highlighted in red.
 
 ![screenshot](img/screenshot.png)
 
-Pass `gotta-go-fast` more than one file, and it will choose one of them at
-random.
+Pass `gotta-go-fast` more than one file, and it will choose one at random.
 
     $ gotta-go-fast src/*
