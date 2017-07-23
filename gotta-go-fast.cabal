@@ -9,6 +9,7 @@ executable gotta-go-fast
   hs-source-dirs:      src
   other-modules:       GottaGoFast
                      , UI
+                     , WordWrap
   main-is:             Main.hs
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
