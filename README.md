@@ -14,7 +14,8 @@ From source:
 ## Usage
 
 Pass `gotta-go-fast` the name of a file, and it will extract a random 30 line
-section for you to type. You'll get a WPM and accuracy report for your trouble.
+section for you to type – or the whole thing if the file is short enough.
+You’ll get a WPM and accuracy report for your trouble.
 
     $ gotta-go-fast README.md
 
