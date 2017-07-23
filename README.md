@@ -29,4 +29,6 @@ Pass `gotta-go-fast` more than one file, and it will choose one at random.
 
 ## Configuration
 
-The maximum number of lines to sample, and the width at which to wrap them, can be changed by setting the options `--height` and `--width`. Run `gotta-go-fast --help` for details.
+The maximum number of lines to sample, and the width at which to wrap them, can
+be changed by setting the `--height` and `--width` options. Run `gotta-go-fast
+--help` for details.
