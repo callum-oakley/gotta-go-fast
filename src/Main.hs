@@ -20,8 +20,8 @@ data Config = Config
 
 config :: Config
 config = Config
-  { height = 30 &= typ "LINES" &=
-    help "The maximum number of lines to sample (default: 30)"
+  { height = 20 &= typ "LINES" &=
+    help "The maximum number of lines to sample (default: 20)"
   , width = 80 &= typ "CHARS" &=
     help "The width at which to wrap lines (default: 80)"
   , tab = 4 &= typ "SIZE" &=
