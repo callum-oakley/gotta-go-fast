@@ -13,7 +13,7 @@ From source:
 
 ## Usage
 
-Pass `gotta-go-fast` the name of a file, and it will extract a random 30 line
+Pass `gotta-go-fast` the name of a file, and it will extract a random 20 line
 section for you to type – or the whole thing if the file is short enough.
 You’ll get a WPM and accuracy report for your trouble.
 
