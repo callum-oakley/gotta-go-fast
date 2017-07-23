@@ -82,7 +82,7 @@ applyBackspaceWord :: State -> State
 applyBackspaceWord s = s { input = backspaceWord $ input s }
 
 initialState :: String -> State
-initialState t = indent $ State
+initialState t = indent State
   { target = t
   , input = ""
   , start = Nothing
