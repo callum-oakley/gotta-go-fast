@@ -13,7 +13,7 @@ executable gotta-go-fast
   main-is:             Main.hs
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
-                     , brick >=0.20
+                     , brick
                      , directory
                      , random
                      , time
