@@ -1,4 +1,4 @@
-module UI where
+module UI (run) where
 
 import Brick
   ( App(..), AttrName, BrickEvent(..), EventM, Location(..), Next, Widget

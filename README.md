@@ -26,3 +26,7 @@ Errors are highlighted in red.
 Pass `gotta-go-fast` more than one file, and it will choose one at random.
 
     $ gotta-go-fast src/*
+
+## Configuration
+
+The maximum number of lines to sample, and the width at which to wrap them, can be changed by setting the options `--height` and `--width`. Run `gotta-go-fast --help` for details.

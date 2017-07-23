@@ -1,7 +1,10 @@
-module FormatCode (expandTabs, wordWrap) where
+module FormatCode (expandTabs, trimEmptyLines, wordWrap) where
 
 expandTabs :: Int -> String -> String
 expandTabs n = concatMap (\c -> if c == '\t' then replicate n ' ' else [c])
+
+trimEmptyLines :: [String] -> [String]
+trimEmptyLines = reverse . dropWhile (== "") . reverse . dropWhile (== "")
 
 getIndent :: String -> String
 getIndent = takeWhile (== ' ')

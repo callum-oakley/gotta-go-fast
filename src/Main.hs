@@ -1,42 +1,52 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Main where
 
 import Control.Monad (filterM)
+import System.Console.CmdArgs
+  (Data, Typeable, args, cmdArgs, def, help, program, summary, typ, (&=))
 import System.Directory (doesFileExist)
-import System.Environment (getArgs, getProgName)
 import System.Random (randomRIO)
 
-import UI
-import FormatCode (expandTabs, wordWrap)
+import UI (run)
+import FormatCode (expandTabs, trimEmptyLines, wordWrap)
 
-maxLineLength :: Int
-maxLineLength = 80
+data Config = Config
+  { height :: Int
+  , width :: Int
+  , tab :: Int
+  , files :: [FilePath]
+  } deriving (Show, Data, Typeable)
 
-maxNoOfLines :: Int
-maxNoOfLines = 30
+config :: Config
+config = Config
+  { height = 30 &= typ "LINES" &=
+    help "The maximum number of lines to sample (default: 30)"
+  , width = 80 &= typ "CHARS" &=
+    help "The width at which to wrap lines (default: 80)"
+  , tab = 4 &= typ "SIZE" &=
+    help "The size of a tab in spaces (default: 4)"
+  , files = def &= args &= typ "FILES"
+  }
+  &= summary "Gotta Go Fast 0.1.0.0"
+  &= help "Practice typing and measure your WPM and accuracy"
+  &= program "gotta-go-fast"
 
-tabWidth :: Int
-tabWidth = 4
-
-trimEmptyLines :: [String] -> [String]
-trimEmptyLines = reverse . dropWhile (== "") . reverse . dropWhile (== "")
-
-sample :: String -> IO String
-sample file = do
-  let ls = lines $ wordWrap maxLineLength $ expandTabs tabWidth file
-  -- For files longer than maxNoOfLines we grab a random segment.
-  r <- randomRIO (0, max 0 $ length ls - maxNoOfLines)
-  return $ unlines $ trimEmptyLines $ take maxNoOfLines $ drop r ls
+sample :: Config -> String -> IO String
+sample c file = do
+  let ls = lines $ wordWrap (width c) $ expandTabs (tab c) file
+  -- For files longer than `lines c` we grab a random segment.
+  r <- randomRIO (0, max 0 $ length ls - height c)
+  return $ unlines $ trimEmptyLines $ take (height c) $ drop r ls
 
 main :: IO ()
 main = do
-  args <- getArgs
-  files <- filterM doesFileExist args
-  case files of
-    [] -> do
-      name <- getProgName
-      putStrLn $ "Usage: " ++ name ++ " <file(s)>"
+  c <- cmdArgs config
+  fs <- filterM doesFileExist $ files c
+  case fs of
+    [] -> putStrLn $ "Requires at least one file path"
     _ -> do
-      r <- randomRIO (0, length files - 1)
-      file <- readFile $ files !! r
-      sampled <- sample file
+      r <- randomRIO (0, length fs - 1)
+      file <- readFile $ fs !! r
+      sampled <- sample c file
       run sampled
