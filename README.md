@@ -3,7 +3,7 @@
 A command line utility for practicing typing and measuring your WPM and
 accuracy. Written with [brick](https://github.com/jtdaugherty/brick).
 
-## Install
+## Installation
 
 From source:
 
