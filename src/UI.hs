@@ -41,7 +41,7 @@ drawResults s = str $
   "Words per minute: " ++ show (round $ wpm s) ++ "\n\n" ++
   "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
   where
-    x = show $ length $ target s
+    x = show $ noOfChars s
     y = show $ round $ seconds s
 
 draw :: State -> [Widget ()]
@@ -56,7 +56,7 @@ handleEnter :: State -> EventM () (Next State)
 handleEnter s
   | hasEnded s = halt s
   | not $ onLastLine s = continue $ applyEnter s
-  | input s ++ "\n" == target s = do
+  | isComplete $ applyChar '\n' s = do
     now <- liftIO getCurrentTime
     continue $ stopClock now s
   | otherwise = continue s
@@ -71,7 +71,7 @@ handleChar c s
 handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
 handleEvent s (VtyEvent (EvKey key [])) =
   case key of
-    KChar '\t' -> continue $ indent s
+    KChar '\t' -> continue $ applyTab s
     KChar c -> handleChar c s
     KEnter -> handleEnter s
     KBS -> continue $ applyBackspace s

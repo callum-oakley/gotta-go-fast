@@ -1,4 +1,28 @@
-module GottaGoFast where
+module GottaGoFast
+  ( Character(..)
+  , Line
+  , Page
+  , State
+  , accuracy
+  , applyBackspace
+  , applyBackspaceWord
+  , applyChar
+  , applyEnter
+  , applyTab
+  , cursor
+  , hasEnded
+  , hasStarted
+  , initialState
+  , isComplete
+  , isErrorFree
+  , noOfChars
+  , onLastLine
+  , page
+  , seconds
+  , startClock
+  , stopClock
+  , wpm
+  ) where
 
 import Data.List (isPrefixOf)
 import Data.Maybe (isJust, fromJust)
@@ -49,6 +73,9 @@ cursor s = (cursorCol s, cursorRow s)
 onLastLine :: State -> Bool
 onLastLine s = cursorRow s + 1 == length (lines $ target s)
 
+isComplete :: State -> Bool
+isComplete s = input s == target s
+
 isErrorFree :: State -> Bool
 isErrorFree s = input s `isPrefixOf` target s
 
@@ -57,13 +84,8 @@ applyChar c s = s' { hits = hits s' + if isErrorFree s' then 1 else 0 }
   where
     s' = s { input = input s ++ [c] , strokes = strokes s + 1 }
 
-indent :: State -> State
-indent s = s { input = input s ++ drop (cursorCol s) leadingSpaces }
-  where
-    leadingSpaces = takeWhile (== ' ') $ lines (target s) !! cursorRow s
-
 applyEnter :: State -> State
-applyEnter = indent . applyChar '\n'
+applyEnter = applyTab . applyChar '\n'
 
 backspace :: String -> String
 backspace "" = ""
@@ -78,8 +100,13 @@ backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
 applyBackspaceWord :: State -> State
 applyBackspaceWord s = s { input = backspaceWord $ input s }
 
+applyTab :: State -> State
+applyTab s = s { input = input s ++ drop (cursorCol s) leadingSpaces }
+  where
+    leadingSpaces = takeWhile (== ' ') $ lines (target s) !! cursorRow s
+
 initialState :: String -> State
-initialState t = indent State
+initialState t = applyTab State
   { target = t
   , input = ""
   , start = Nothing
@@ -110,6 +137,9 @@ page s = linesBeforeCursor ++ linesAfterCursor
     linesBeforeCursor = map (line BeforeCursor) $ take (cursorRow s) linePairs
     linesAfterCursor = map (line AfterCursor) $ drop (cursorRow s) linePairs
     linePairs = zip (lines $ target s) (lines (input s) ++ repeat "")
+
+noOfChars :: State -> Int
+noOfChars = length . input
 
 -- The following functions are only safe to use when both hasStarted and
 -- hasEnded hold.
