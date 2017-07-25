@@ -10,7 +10,7 @@ import Brick.Widgets.Center (center)
 import Control.Monad.IO.Class (liftIO)
 import Data.Time (getCurrentTime)
 import Graphics.Vty
-  (Event(..), Key(..), Modifier(..), brightBlack, defAttr, red)
+  (Color, Event(..), Key(..), Modifier(..), rgbColor, defAttr, red)
 
 import GottaGoFast
 
@@ -19,6 +19,9 @@ emptyAttr = attrName "target"
 
 missAttr :: AttrName
 missAttr = attrName "error"
+
+grey :: Color
+grey = rgbColor 128 128 128
 
 drawCharacter :: Character -> Widget ()
 drawCharacter (Hit c) = str [c]
@@ -91,7 +94,7 @@ app = App
   , appHandleEvent = handleEvent
   , appStartEvent = return
   , appAttrMap = const $ attrMap defAttr
-    [(emptyAttr, fg brightBlack), (missAttr, fg red), (borderAttr, fg red)]
+    [(emptyAttr, fg grey), (missAttr, fg red), (borderAttr, fg red)]
   }
 
 run :: String -> IO ()
