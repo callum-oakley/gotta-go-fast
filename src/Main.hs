@@ -28,7 +28,7 @@ config = Config
     help "The size of a tab in spaces (default: 4)"
   , files = def &= args &= typ "FILES"
   }
-  &= summary "Gotta Go Fast 0.1.0.0"
+  &= summary "Gotta Go Fast 0.1.1.0"
   &= help "Practice typing and measure your WPM and accuracy"
   &= program "gotta-go-fast"
 
