@@ -9,7 +9,7 @@ import System.Directory (doesFileExist)
 import System.Random (randomRIO)
 
 import UI (run)
-import FormatCode (expandTabs, trimEmptyLines, wordWrap)
+import FormatCode (toAscii, trimEmptyLines, wordWrap)
 
 data Config = Config
   { height :: Int
@@ -34,7 +34,7 @@ config = Config
 
 sample :: Config -> String -> IO String
 sample c file = do
-  let ls = lines $ wordWrap (width c) $ expandTabs (tab c) file
+  let ls = lines $ wordWrap (width c) $ toAscii (tab c) file
   -- For files longer than `lines c` we grab a random segment.
   r <- randomRIO (0, max 0 $ length ls - height c)
   return $ unlines $ trimEmptyLines $ take (height c) $ drop r ls

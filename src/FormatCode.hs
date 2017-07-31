@@ -1,7 +1,18 @@
-module FormatCode (expandTabs, trimEmptyLines, wordWrap) where
+module FormatCode (toAscii, trimEmptyLines, wordWrap) where
 
-expandTabs :: Int -> String -> String
-expandTabs n = concatMap (\c -> if c == '\t' then replicate n ' ' else [c])
+import Data.Char (isAscii, isPrint)
+
+toAscii :: Int -> String -> String
+toAscii tabWidth = concatMap toAscii'
+  where
+    toAscii' c
+      | c == '\t' = replicate tabWidth ' '
+      | c == '‘' || c == '’' = "'"
+      | c == '“' || c == '”' = "\""
+      | c == '–' || c == '—' = "-"
+      | c == '…' = "..."
+      | isAscii c && (isPrint c || c == '\n') = [c]
+      | otherwise = ""
 
 trimEmptyLines :: [String] -> [String]
 trimEmptyLines = reverse . dropWhile (== "") . reverse . dropWhile (== "")
