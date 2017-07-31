@@ -44,7 +44,7 @@ main = do
   c <- cmdArgs config
   fs <- filterM doesFileExist $ files c
   case fs of
-    [] -> putStrLn $ "Requires at least one file path"
+    [] -> putStrLn "Requires at least one file path"
     _ -> do
       r <- randomRIO (0, length fs - 1)
       file <- readFile $ fs !! r

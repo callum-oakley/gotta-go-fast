@@ -63,6 +63,7 @@ handleEnter s
 
 handleChar :: Char -> State -> EventM () (Next State)
 handleChar c s
+  | c == ' ' && atEndOfLine s = handleEnter s
   | hasStarted s = continue $ applyChar c s
   | otherwise = do
     now <- liftIO getCurrentTime

@@ -9,6 +9,7 @@ module GottaGoFast
   , applyChar
   , applyEnter
   , applyTab
+  , atEndOfLine
   , cursor
   , hasEnded
   , hasStarted
@@ -34,12 +35,12 @@ import Data.Time (UTCTime, diffUTCTime)
 data Position = BeforeCursor | AfterCursor
 
 data State = State
-  { target  :: String
-  , input   :: String
-  , start   :: Maybe UTCTime
-  , end     :: Maybe UTCTime
+  { target :: String
+  , input :: String
+  , start :: Maybe UTCTime
+  , end :: Maybe UTCTime
   , strokes :: Integer
-  , hits    :: Integer
+  , hits :: Integer
   }
 
 -- For ease of rendering a character in the UI, we tag it as a Hit, Miss, or
@@ -69,6 +70,9 @@ cursorRow = length . filter (== '\n') . input
 
 cursor :: State -> (Int, Int)
 cursor s = (cursorCol s, cursorRow s)
+
+atEndOfLine :: State -> Bool
+atEndOfLine s = cursorCol s == length (lines (target s) !! cursorRow s)
 
 onLastLine :: State -> Bool
 onLastLine s = cursorRow s + 1 == length (lines $ target s)
