@@ -5,6 +5,10 @@ accuracy. Written with [brick](https://github.com/jtdaugherty/brick).
 
 ## Installation
 
+With [Cabal](https://wiki.haskell.org/Cabal/How_to_install_a_Cabal_package):
+
+    $ cabal install gotta-go-fast
+
 From source:
 
     $ git clone https://github.com/hot-leaf-juice/gotta-go-fast
