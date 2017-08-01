@@ -1,5 +1,10 @@
 name:                gotta-go-fast
 version:             0.1.2.0
+synopsis:            A command line utility for practicing typing
+category:            Application
+author:              Callum Oakley
+maintainer:          c.oakley108@gmail.com
+homepage:            https://github.com/hot-leaf-juice/gotta-go-fast
 license:             BSD3
 license-file:        LICENSE
 build-type:          Simple
