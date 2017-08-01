@@ -34,7 +34,7 @@ config = Config
 
 sample :: Config -> String -> IO String
 sample c file = do
-  r <- randomRIO (0, max 0 $ (length $ lines ascii) - height c)
+  r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
   return $ trimEmptyLines $ chop $ wrap $ chop $ unlines $ drop r $ lines ascii
     where
       ascii = toAscii (tab c) file
