@@ -7,9 +7,11 @@ import System.Console.CmdArgs
   (Data, Typeable, args, cmdArgs, def, help, program, summary, typ, (&=))
 import System.Directory (doesFileExist)
 import System.Random (randomRIO)
+import qualified Data.Text as T
+import Text.Wrap (wrapText)
 
 import UI (run)
-import FormatCode (toAscii, trimEmptyLines, wordWrap)
+import FormatCode (toAscii, trimEmptyLines)
 
 data Config = Config
   { height :: Int
@@ -39,7 +41,7 @@ sample c file = do
     where
       ascii = toAscii (tab c) file
       chop = unlines . take (height c) . lines
-      wrap = wordWrap (width c)
+      wrap = T.unpack . wrapText (width c) . T.pack
 
 main :: IO ()
 main = do

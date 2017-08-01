@@ -22,6 +22,8 @@ executable gotta-go-fast
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
                      , brick
+                     , word-wrap
+                     , text
                      , cmdargs
                      , directory
                      , random
