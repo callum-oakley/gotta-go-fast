@@ -14,8 +14,10 @@ toAscii tabWidth = concatMap toAscii'
       | isAscii c && (isPrint c || c == '\n') = [c]
       | otherwise = ""
 
-trimEmptyLines :: [String] -> [String]
-trimEmptyLines = reverse . dropWhile (== "") . reverse . dropWhile (== "")
+trimEmptyLines :: String -> String
+trimEmptyLines = (++ "\n") . f . f
+  where
+    f = reverse . dropWhile (== '\n')
 
 getIndent :: String -> String
 getIndent = takeWhile (== ' ')

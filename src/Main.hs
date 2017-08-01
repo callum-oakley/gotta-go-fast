@@ -34,10 +34,12 @@ config = Config
 
 sample :: Config -> String -> IO String
 sample c file = do
-  let ls = lines $ wordWrap (width c) $ toAscii (tab c) file
-  -- For files longer than `lines c` we grab a random segment.
-  r <- randomRIO (0, max 0 $ length ls - height c)
-  return $ unlines $ trimEmptyLines $ take (height c) $ drop r ls
+  r <- randomRIO (0, max 0 $ (length $ lines ascii) - height c)
+  return $ trimEmptyLines $ chop $ wrap $ chop $ unlines $ drop r $ lines ascii
+    where
+      ascii = toAscii (tab c) file
+      chop = unlines . take (height c) . lines
+      wrap = wordWrap (width c)
 
 main :: IO ()
 main = do
