@@ -1,5 +1,5 @@
 name:                gotta-go-fast
-version:             0.1.2.0
+version:             0.1.3.0
 synopsis:            A command line utility for practicing typing
 description:
   A command line utility for practicing typing and measuring your WPM and accuracy. See the project <https://github.com/hot-leaf-juice/gotta-go-fast/blob/master/README.md README> for details.
@@ -20,7 +20,7 @@ executable gotta-go-fast
                      , FormatCode
   main-is:             Main.hs
   ghc-options:         -threaded
-  build-depends:       base >=4.9 && <4.10
+  build-depends:       base >=4.9
                      , brick
                      , cmdargs
                      , directory

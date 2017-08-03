@@ -1,5 +1,7 @@
 module UI (run) where
 
+import Data.Word (Word8)
+
 import Brick
   ( App(..), AttrName, BrickEvent(..), EventM, Location(..), Next, Widget
   , attrMap, attrName, continue, defaultMain, emptyWidget, fg, halt, padAll
@@ -10,7 +12,7 @@ import Brick.Widgets.Center (center)
 import Control.Monad.IO.Class (liftIO)
 import Data.Time (getCurrentTime)
 import Graphics.Vty
-  (Event(..), Key(..), Modifier(..), brightBlack, defAttr, red)
+  (Attr, Color(..), Event(..), Key(..), Modifier(..), defAttr, withStyle)
 
 import GottaGoFast
 
@@ -85,17 +87,20 @@ handleEvent s (VtyEvent (EvKey key [MCtrl])) =
     _ -> continue s
 handleEvent s _ = continue s
 
-app :: App State e ()
-app = App
+app :: Attr -> Attr -> App State e ()
+app fgEmpty fgError = App
   { appDraw = draw
   , appChooseCursor = showFirstCursor
   , appHandleEvent = handleEvent
   , appStartEvent = return
   , appAttrMap = const $ attrMap defAttr
-    [(emptyAttr, fg brightBlack), (missAttr, fg red), (borderAttr, fg red)]
+    [(emptyAttr, fgEmpty), (missAttr, fgError), (borderAttr, fgError)]
   }
 
-run :: String -> IO ()
-run t = do
-  _ <- defaultMain app $ initialState t
+run :: Word8 -> Word8 -> String -> IO ()
+run fgEmptyCode fgErrorCode t = do
+  _ <- defaultMain (app fgEmpty fgError) $ initialState t
   return ()
+    where
+      fgEmpty = fg $ ISOColor fgEmptyCode
+      fgError = fg $ ISOColor fgErrorCode
