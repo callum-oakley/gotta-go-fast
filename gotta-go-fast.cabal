@@ -20,7 +20,7 @@ executable gotta-go-fast
                      , FormatCode
   main-is:             Main.hs
   ghc-options:         -threaded
-  build-depends:       base >=4.9
+  build-depends:       base >=4.9 && <4.11
                      , brick
                      , cmdargs
                      , directory
