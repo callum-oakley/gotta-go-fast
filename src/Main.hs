@@ -44,6 +44,7 @@ config = Config
 wrapSettings :: WrapSettings
 wrapSettings =
     WrapSettings { preserveIndentation = True
+                 , breakLongWords = True
                  }
 
 sample :: Config -> String -> IO String
