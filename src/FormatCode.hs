@@ -43,5 +43,6 @@ wordWrap n = result . foldl greedy ("", "", "", "") . ensureEndWithNewline
       | otherwise = (acc ++ l ++ "\n", getIndent l ++ w, " ", "")
     greedy (acc, l, s, w) c
       | length (getIndent l ++ w) < n = (acc, l, s, w ++ [c])
+      | l == "" = (acc ++ getIndent l ++ w ++ "\n", getIndent l, "", [c])
       | otherwise =
         (acc ++ l ++ "\n" ++ getIndent l ++ w ++ "\n", getIndent l, "", [c])
