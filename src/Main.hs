@@ -35,7 +35,7 @@ config = Config
     help "The ISO colour code for errors (default: 1)"
   , files = def &= args &= typ "FILES"
   }
-  &= summary "Gotta Go Fast 0.1.3.0"
+  &= summary "Gotta Go Fast 0.1.3.1"
   &= help "Practice typing and measure your WPM and accuracy"
   &= program "gotta-go-fast"
 
