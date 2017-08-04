@@ -37,5 +37,11 @@ Pass `gotta-go-fast` more than one file, and it will choose one at random.
 ## Configuration
 
 The maximum number of lines to sample, and the width at which to wrap them, can
-be changed by setting `--height` and `--width`. Run `gotta-go-fast --help` for
-details.
+be changed by setting `--height` and `--width`.
+
+The colour for untyped text and the colour for errors can be changed by setting
+`--fg-empty` and `--fg-error` to the appropriate [ISOColor
+code](https://hackage.haskell.org/package/vty-5.15.1/docs/Graphics-Vty-Attributes.html#t:Color).
+If you are greeted with a blank screen, you should try changing `--fg-empty`.
+
+Run `gotta-go-fast --help` for details.

@@ -4,3 +4,5 @@ packages:
 - '.'
 extra-deps:
 resolver: lts-8.23
+nix:
+  packages: [gcc, ncurses]

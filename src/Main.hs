@@ -2,6 +2,7 @@
 
 module Main where
 
+import Data.Word (Word8)
 import Control.Monad (filterM)
 import System.Console.CmdArgs
   (Data, Typeable, args, cmdArgs, def, help, program, summary, typ, (&=))
@@ -18,6 +19,8 @@ data Config = Config
   , width :: Int
   , tab :: Int
   , files :: [FilePath]
+  , fg_empty :: Word8
+  , fg_error :: Word8
   } deriving (Show, Data, Typeable)
 
 config :: Config
@@ -28,9 +31,13 @@ config = Config
     help "The width at which to wrap lines (default: 80)"
   , tab = 4 &= typ "SIZE" &=
     help "The size of a tab in spaces (default: 4)"
+  , fg_empty = 8 &= typ "COLOUR" &=
+    help "The ISO colour code for empty (not yet typed) characters (default: 8)"
+  , fg_error = 1 &= typ "COLOUR" &=
+    help "The ISO colour code for errors (default: 1)"
   , files = def &= args &= typ "FILES"
   }
-  &= summary "Gotta Go Fast 0.1.2.0"
+  &= summary "Gotta Go Fast 0.1.3.0"
   &= help "Practice typing and measure your WPM and accuracy"
   &= program "gotta-go-fast"
 
@@ -58,4 +65,4 @@ main = do
       r <- randomRIO (0, length fs - 1)
       file <- readFile $ fs !! r
       sampled <- sample c file
-      run sampled
+      run (fg_empty c) (fg_error c) sampled
