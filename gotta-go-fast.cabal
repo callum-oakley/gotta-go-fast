@@ -21,8 +21,8 @@ executable gotta-go-fast
   main-is:             Main.hs
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.10
-                     , brick
-                     , word-wrap
+                     , brick >= 0.21
+                     , word-wrap >= 0.2
                      , text
                      , cmdargs
                      , directory

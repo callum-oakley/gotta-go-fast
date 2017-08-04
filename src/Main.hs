@@ -8,7 +8,7 @@ import System.Console.CmdArgs
 import System.Directory (doesFileExist)
 import System.Random (randomRIO)
 import qualified Data.Text as T
-import Text.Wrap (wrapText)
+import Text.Wrap (wrapText, WrapSettings(..))
 
 import UI (run)
 import FormatCode (toAscii, trimEmptyLines)
@@ -34,6 +34,11 @@ config = Config
   &= help "Practice typing and measure your WPM and accuracy"
   &= program "gotta-go-fast"
 
+wrapSettings :: WrapSettings
+wrapSettings =
+    WrapSettings { preserveIndentation = True
+                 }
+
 sample :: Config -> String -> IO String
 sample c file = do
   r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
@@ -41,7 +46,7 @@ sample c file = do
     where
       ascii = toAscii (tab c) file
       chop = unlines . take (height c) . lines
-      wrap = T.unpack . wrapText (width c) . T.pack
+      wrap = T.unpack . wrapText wrapSettings (width c) . T.pack
 
 main :: IO ()
 main = do
