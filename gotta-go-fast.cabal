@@ -22,7 +22,7 @@ executable gotta-go-fast
   ghc-options:         -threaded
   build-depends:       base >=4.9 && <4.11
                      , brick >= 0.21
-                     , word-wrap >= 0.3.1
+                     , word-wrap >= 0.3.2
                      , text
                      , cmdargs
                      , directory
