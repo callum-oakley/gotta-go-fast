@@ -22,7 +22,8 @@ If you’re on macOS, you can also grab an executable from
 
 Pass `gotta-go-fast` the name of a file, and it will extract a random 20 line
 section for you to type – or the whole thing if the file is short enough.
-You’ll get a WPM and accuracy report for your trouble.
+You’ll get a WPM and accuracy report after typing through the whole sample
+*with no errors* (use backspace to go back and make corrections).
 
     $ gotta-go-fast README.md
 
