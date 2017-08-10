@@ -2,17 +2,17 @@
 
 module Main where
 
-import Data.Word (Word8)
 import Control.Monad (filterM)
+import Data.Word (Word8)
+import Data.Char (isAscii, isPrint)
 import System.Console.CmdArgs
   (Data, Typeable, args, cmdArgs, def, help, program, summary, typ, (&=))
 import System.Directory (doesFileExist)
 import System.Random (randomRIO)
-import qualified Data.Text as T
 import Text.Wrap (wrapText, WrapSettings(..))
+import qualified Data.Text as T
 
 import UI (run)
-import FormatCode (toAscii, trimEmptyLines)
 
 data Config = Config
   { height :: Int
@@ -22,6 +22,23 @@ data Config = Config
   , fg_empty :: Word8
   , fg_error :: Word8
   } deriving (Show, Data, Typeable)
+
+toAscii :: Int -> String -> String
+toAscii tabWidth = concatMap toAscii'
+  where
+    toAscii' c
+      | c == '\t' = replicate tabWidth ' '
+      | c == '‘' || c == '’' = "'"
+      | c == '“' || c == '”' = "\""
+      | c == '–' || c == '—' = "-"
+      | c == '…' = "..."
+      | isAscii c && (isPrint c || c == '\n') = [c]
+      | otherwise = ""
+
+trimEmptyLines :: String -> String
+trimEmptyLines = (++ "\n") . f . f
+  where
+    f = reverse . dropWhile (== '\n')
 
 config :: Config
 config = Config
@@ -37,15 +54,9 @@ config = Config
     help "The ISO colour code for errors (default: 1)"
   , files = def &= args &= typ "FILES"
   }
-  &= summary "Gotta Go Fast 0.1.3.1"
+  &= summary "Gotta Go Fast 0.1.4.0"
   &= help "Practice typing and measure your WPM and accuracy"
   &= program "gotta-go-fast"
-
-wrapSettings :: WrapSettings
-wrapSettings =
-    WrapSettings { preserveIndentation = True
-                 , breakLongWords = True
-                 }
 
 sample :: Config -> String -> IO String
 sample c file = do
@@ -55,6 +66,10 @@ sample c file = do
       ascii = toAscii (tab c) file
       chop = unlines . take (height c) . lines
       wrap = T.unpack . wrapText wrapSettings (width c) . T.pack
+      wrapSettings = WrapSettings
+        { preserveIndentation = True
+        , breakLongWords = True
+        }
 
 main :: IO ()
 main = do
