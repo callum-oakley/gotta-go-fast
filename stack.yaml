@@ -1,11 +1,13 @@
 flags: {}
+nix:
+  packages:
+  - gcc
+  - ncurses
 extra-package-dbs: []
 packages:
-- '.'
+- .
 extra-deps:
-- 'brick-0.21'
-- 'word-wrap-0.3.2'
-- 'data-clist-0.1.2.0'
+- brick-0.21
+- data-clist-0.1.2.0
+- word-wrap-0.4.1
 resolver: lts-8.23
-nix:
-  packages: [gcc, ncurses]
