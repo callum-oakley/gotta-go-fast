@@ -49,13 +49,13 @@ config =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
     , width =
-        80 &= typ "CHARS" &=
-        help "The width at which to wrap lines (default: 80)"
+        100 &= typ "CHARS" &=
+        help "The width at which to wrap lines (default: 100)"
     , tab = 4 &= typ "SIZE" &= help "The size of a tab in spaces (default: 4)"
     , fg_empty =
-        8 &= typ "COLOUR" &=
+        4 &= typ "COLOUR" &=
         help
-          "The ISO colour code for empty (not yet typed) characters (default: 8)"
+          "The ISO colour code for empty (not yet typed) characters (default: 4)"
     , fg_error =
         1 &= typ "COLOUR" &= help "The ISO colour code for errors (default: 1)"
     , files = def &= args &= typ "FILES"
