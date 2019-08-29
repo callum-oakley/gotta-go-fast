@@ -25,36 +25,44 @@ module GottaGoFast
   , wpm
   ) where
 
-import Data.List (isPrefixOf)
-import Data.Maybe (isJust, fromJust)
-import Data.Time (UTCTime, diffUTCTime)
+import           Data.List  (isPrefixOf)
+import           Data.Maybe (fromJust, isJust)
+import           Data.Time  (UTCTime, diffUTCTime)
 
 -- It is often useful to know whether the line / character etc we are
 -- considering is "BeforeCursor" or "AfterCursor". More granularity turns out
 -- to be unnecessary.
-data Position = BeforeCursor | AfterCursor
+data Position
+  = BeforeCursor
+  | AfterCursor
 
-data State = State
-  { target :: String
-  , input :: String
-  , start :: Maybe UTCTime
-  , end :: Maybe UTCTime
-  , strokes :: Integer
-  , hits :: Integer
-  }
+data State =
+  State
+    { target  :: String
+    , input   :: String
+    , start   :: Maybe UTCTime
+    , end     :: Maybe UTCTime
+    , strokes :: Integer
+    , hits    :: Integer
+    }
 
 -- For ease of rendering a character in the UI, we tag it as a Hit, Miss, or
 -- Empty. Corresponding to the cases of being correctly typed, incorrectly
 -- typed (or skipped), or not yet typed.
-data Character = Hit Char | Miss Char | Empty Char
+data Character
+  = Hit Char
+  | Miss Char
+  | Empty Char
+
 type Line = [Character]
+
 type Page = [Line]
 
 startClock :: UTCTime -> State -> State
-startClock now s = s { start = Just now }
+startClock now s = s {start = Just now}
 
 stopClock :: UTCTime -> State -> State
-stopClock now s = s { end = Just now }
+stopClock now s = s {end = Just now}
 
 hasStarted :: State -> Bool
 hasStarted = isJust . start
@@ -84,9 +92,16 @@ isErrorFree :: State -> Bool
 isErrorFree s = input s `isPrefixOf` target s
 
 applyChar :: Char -> State -> State
-applyChar c s = s' { hits = hits s' + if isErrorFree s' then 1 else 0 }
+applyChar c s =
+  s'
+    { hits =
+        hits s' +
+        if isErrorFree s'
+          then 1
+          else 0
+    }
   where
-    s' = s { input = input s ++ [c] , strokes = strokes s + 1 }
+    s' = s {input = input s ++ [c], strokes = strokes s + 1}
 
 applyEnter :: State -> State
 applyEnter = applyTab . applyChar '\n'
@@ -96,28 +111,30 @@ backspace "" = ""
 backspace xs = init xs
 
 applyBackspace :: State -> State
-applyBackspace s = s { input = backspace $ input s }
+applyBackspace s = s {input = backspace $ input s}
 
 backspaceWord :: String -> String
 backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
 
 applyBackspaceWord :: State -> State
-applyBackspaceWord s = s { input = backspaceWord $ input s }
+applyBackspaceWord s = s {input = backspaceWord $ input s}
 
 applyTab :: State -> State
-applyTab s = s { input = input s ++ drop (cursorCol s) leadingSpaces }
+applyTab s = s {input = input s ++ drop (cursorCol s) leadingSpaces}
   where
     leadingSpaces = takeWhile (== ' ') $ lines (target s) !! cursorRow s
 
 initialState :: String -> State
-initialState t = applyTab State
-  { target = t
-  , input = ""
-  , start = Nothing
-  , end = Nothing
-  , strokes = 0
-  , hits = 0
-  }
+initialState t =
+  applyTab
+    State
+      { target = t
+      , input = ""
+      , start = Nothing
+      , end = Nothing
+      , strokes = 0
+      , hits = 0
+      }
 
 character :: Position -> (Maybe Char, Maybe Char) -> Character
 character _ (Just t, Just i)
@@ -147,7 +164,6 @@ noOfChars = length . input
 
 -- The following functions are only safe to use when both hasStarted and
 -- hasEnded hold.
-
 seconds :: State -> Rational
 seconds s = toRational $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
 

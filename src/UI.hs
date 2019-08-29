@@ -1,20 +1,23 @@
-module UI (run) where
+module UI
+  ( run
+  ) where
 
-import Data.Word (Word8)
+import           Data.Word              (Word8)
 
-import Brick
-  ( App(..), AttrName, BrickEvent(..), EventM, Location(..), Next, Widget
-  , attrMap, attrName, continue, defaultMain, emptyWidget, fg, halt, padAll
-  , showCursor, showFirstCursor, str, withAttr, (<+>), (<=>)
-  )
-import Brick.Widgets.Border (border, borderAttr)
-import Brick.Widgets.Center (center)
-import Control.Monad.IO.Class (liftIO)
-import Data.Time (getCurrentTime)
-import Graphics.Vty
-  (Attr, Color(..), Event(..), Key(..), Modifier(..), defAttr, withStyle)
+import           Brick                  (App (..), AttrName, BrickEvent (..),
+                                         EventM, Location (..), Next, Widget,
+                                         attrMap, attrName, continue,
+                                         defaultMain, emptyWidget, fg, halt,
+                                         padAll, showCursor, showFirstCursor,
+                                         str, withAttr, (<+>), (<=>))
+import           Brick.Widgets.Border   (border, borderAttr)
+import           Brick.Widgets.Center   (center)
+import           Control.Monad.IO.Class (liftIO)
+import           Data.Time              (getCurrentTime)
+import           Graphics.Vty           (Attr, Color (..), Event (..), Key (..),
+                                         Modifier (..), defAttr, withStyle)
 
-import GottaGoFast
+import           GottaGoFast
 
 emptyAttr :: AttrName
 emptyAttr = attrName "target"
@@ -23,10 +26,10 @@ missAttr :: AttrName
 missAttr = attrName "error"
 
 drawCharacter :: Character -> Widget ()
-drawCharacter (Hit c) = str [c]
+drawCharacter (Hit c)    = str [c]
 drawCharacter (Miss ' ') = withAttr missAttr $ str ['_']
-drawCharacter (Miss c) = withAttr missAttr $ str [c]
-drawCharacter (Empty c) = withAttr emptyAttr $ str [c]
+drawCharacter (Miss c)   = withAttr missAttr $ str [c]
+drawCharacter (Empty c)  = withAttr emptyAttr $ str [c]
 
 drawLine :: Line -> Widget ()
 -- We display an empty line as a single space so that it still occupies
@@ -38,10 +41,16 @@ drawPage :: State -> Widget ()
 drawPage s = foldl (<=>) emptyWidget $ map drawLine $ page s
 
 drawResults :: State -> Widget ()
-drawResults s = str $
-  "You typed " ++ x ++ " characters in " ++ y ++ " seconds.\n\n" ++
-  "Words per minute: " ++ show (round $ wpm s) ++ "\n\n" ++
-  "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
+drawResults s =
+  str $
+  "You typed " ++
+  x ++
+  " characters in " ++
+  y ++
+  " seconds.\n\n" ++
+  "Words per minute: " ++
+  show (round $ wpm s) ++
+  "\n\n" ++ "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
   where
     x = show $ noOfChars s
     y = show $ round $ seconds s
@@ -75,32 +84,36 @@ handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
 handleEvent s (VtyEvent (EvKey key [])) =
   case key of
     KChar '\t' -> continue $ applyTab s
-    KChar c -> handleChar c s
-    KEnter -> handleEnter s
-    KBS -> continue $ applyBackspace s
-    _ -> continue s
+    KChar c    -> handleChar c s
+    KEnter     -> handleEnter s
+    KBS        -> continue $ applyBackspace s
+    _          -> continue s
 handleEvent s (VtyEvent (EvKey key [MCtrl])) =
   case key of
     KChar 'w' -> continue $ applyBackspaceWord s
     KChar 'c' -> halt s
     KChar 'd' -> halt s
-    _ -> continue s
+    _         -> continue s
 handleEvent s _ = continue s
 
 app :: Attr -> Attr -> App State e ()
-app fgEmpty fgError = App
-  { appDraw = draw
-  , appChooseCursor = showFirstCursor
-  , appHandleEvent = handleEvent
-  , appStartEvent = return
-  , appAttrMap = const $ attrMap defAttr
-    [(emptyAttr, fgEmpty), (missAttr, fgError), (borderAttr, fgError)]
-  }
+app fgEmpty fgError =
+  App
+    { appDraw = draw
+    , appChooseCursor = showFirstCursor
+    , appHandleEvent = handleEvent
+    , appStartEvent = return
+    , appAttrMap =
+        const $
+        attrMap
+          defAttr
+          [(emptyAttr, fgEmpty), (missAttr, fgError), (borderAttr, fgError)]
+    }
 
 run :: Word8 -> Word8 -> String -> IO ()
 run fgEmptyCode fgErrorCode t = do
   _ <- defaultMain (app fgEmpty fgError) $ initialState t
   return ()
-    where
-      fgEmpty = fg $ ISOColor fgEmptyCode
-      fgError = fg $ ISOColor fgErrorCode
+  where
+    fgEmpty = fg $ ISOColor fgEmptyCode
+    fgError = fg $ ISOColor fgErrorCode
