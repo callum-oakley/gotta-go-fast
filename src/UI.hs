@@ -81,6 +81,13 @@ handleChar c s
     continue $ applyChar c $ startClock now s
 
 handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
+handleEvent s (VtyEvent (EvKey key [MCtrl])) =
+  case key of
+    KChar 'c' -> halt s
+    KChar 'd' -> halt s
+    _         -> continue s
+handleEvent s _
+  | hasEnded s = continue s
 handleEvent s (VtyEvent (EvKey key [])) =
   case key of
     KChar '\t' -> continue $ applyTab s
@@ -88,12 +95,6 @@ handleEvent s (VtyEvent (EvKey key [])) =
     KEnter     -> handleEnter s
     KBS        -> continue $ applyBackspace s
     _          -> continue s
-handleEvent s (VtyEvent (EvKey key [MCtrl])) =
-  case key of
-    KChar 'w' -> continue $ applyBackspaceWord s
-    KChar 'c' -> halt s
-    KChar 'd' -> halt s
-    _         -> continue s
 handleEvent s _ = continue s
 
 app :: Attr -> Attr -> App State e ()
