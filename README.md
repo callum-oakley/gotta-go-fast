@@ -5,18 +5,11 @@ accuracy. Written with [brick](https://github.com/jtdaugherty/brick).
 
 ## Installation
 
-With [Cabal](https://wiki.haskell.org/Cabal/How_to_install_a_Cabal_package):
-
-    $ cabal install gotta-go-fast
-
 From source:
 
     $ git clone https://github.com/callum-oakley/gotta-go-fast
     $ cd gotta-go-fast
     $ stack install
-
-If you’re on macOS, you can also grab an executable from
-[releases](https://github.com/callum-oakley/gotta-go-fast/releases).
 
 ## Usage
 
