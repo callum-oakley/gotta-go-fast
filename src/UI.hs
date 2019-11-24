@@ -65,7 +65,6 @@ draw s
 
 handleEnter :: State -> EventM () (Next State)
 handleEnter s
-  | hasEnded s = halt s
   | not $ onLastLine s = continue $ applyEnter s
   | isComplete $ applyChar '\n' s = do
     now <- liftIO getCurrentTime
@@ -86,15 +85,19 @@ handleEvent s (VtyEvent (EvKey key [MCtrl])) =
     KChar 'c' -> halt s
     KChar 'd' -> halt s
     _         -> continue s
-handleEvent s _
-  | hasEnded s = continue s
-handleEvent s (VtyEvent (EvKey key [])) =
-  case key of
-    KChar '\t' -> continue $ applyTab s
-    KChar c    -> handleChar c s
-    KEnter     -> handleEnter s
-    KBS        -> continue $ applyBackspace s
-    _          -> continue s
+handleEvent s (VtyEvent (EvKey key []))
+  | hasEnded s =
+    case key of
+      KEnter -> halt s
+      KEsc   -> halt s
+      _      -> continue s
+  | otherwise =
+    case key of
+      KChar '\t' -> continue $ applyTab s
+      KChar c    -> handleChar c s
+      KEnter     -> handleEnter s
+      KBS        -> continue $ applyBackspace s
+      _          -> continue s
 handleEvent s _ = continue s
 
 app :: Attr -> Attr -> App State e ()
