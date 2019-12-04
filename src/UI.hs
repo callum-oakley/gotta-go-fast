@@ -10,26 +10,27 @@ import           Brick                  (App (..), AttrName, BrickEvent (..),
                                          defaultMain, emptyWidget, fg, halt,
                                          padAll, showCursor, showFirstCursor,
                                          str, withAttr, (<+>), (<=>))
-import           Brick.Widgets.Border   (border, borderAttr)
 import           Brick.Widgets.Center   (center)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.Time              (getCurrentTime)
 import           Graphics.Vty           (Attr, Color (..), Event (..), Key (..),
-                                         Modifier (..), defAttr, withStyle)
+                                         Modifier (..), bold, defAttr,
+                                         withStyle)
 
+import           Data.Maybe             (fromMaybe)
 import           GottaGoFast
 
-emptyAttr :: AttrName
-emptyAttr = attrName "target"
+emptyAttrName :: AttrName
+emptyAttrName = attrName "empty"
 
-missAttr :: AttrName
-missAttr = attrName "error"
+errorAttrName :: AttrName
+errorAttrName = attrName "error"
 
 drawCharacter :: Character -> Widget ()
 drawCharacter (Hit c)    = str [c]
-drawCharacter (Miss ' ') = withAttr missAttr $ str ['_']
-drawCharacter (Miss c)   = withAttr missAttr $ str [c]
-drawCharacter (Empty c)  = withAttr emptyAttr $ str [c]
+drawCharacter (Miss ' ') = withAttr errorAttrName $ str ['_']
+drawCharacter (Miss c)   = withAttr errorAttrName $ str [c]
+drawCharacter (Empty c)  = withAttr emptyAttrName $ str [c]
 
 drawLine :: Line -> Widget ()
 -- We display an empty line as a single space so that it still occupies
@@ -58,8 +59,7 @@ drawResults s =
 draw :: State -> [Widget ()]
 draw s
   | hasEnded s = pure $ center $ drawResults s
-  | isErrorFree s = pure $ center p
-  | otherwise = pure $ center $ border p
+  | otherwise = pure $ center p
   where
     p = padAll 1 $ showCursor () (Location $ cursor s) $ drawPage s
 
@@ -101,7 +101,7 @@ handleEvent s (VtyEvent (EvKey key []))
 handleEvent s _ = continue s
 
 app :: Attr -> Attr -> App State e ()
-app fgEmpty fgError =
+app emptyAttr errorAttr =
   App
     { appDraw = draw
     , appChooseCursor = showFirstCursor
@@ -109,15 +109,13 @@ app fgEmpty fgError =
     , appStartEvent = return
     , appAttrMap =
         const $
-        attrMap
-          defAttr
-          [(emptyAttr, fgEmpty), (missAttr, fgError), (borderAttr, fgError)]
+        attrMap defAttr [(emptyAttrName, emptyAttr), (errorAttrName, errorAttr)]
     }
 
-run :: Word8 -> Word8 -> String -> IO ()
+run :: Maybe Word8 -> Maybe Word8 -> String -> IO ()
 run fgEmptyCode fgErrorCode t = do
-  _ <- defaultMain (app fgEmpty fgError) $ initialState t
+  _ <- defaultMain (app emptyAttr errorAttr) $ initialState t
   return ()
   where
-    fgEmpty = fg $ ISOColor fgEmptyCode
-    fgError = fg $ ISOColor fgErrorCode
+    emptyAttr = fg $ maybe (Color240 231) ISOColor fgEmptyCode
+    errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode

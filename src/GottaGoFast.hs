@@ -15,7 +15,6 @@ module GottaGoFast
   , hasStarted
   , initialState
   , isComplete
-  , isErrorFree
   , noOfChars
   , onLastLine
   , page

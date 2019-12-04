@@ -20,8 +20,8 @@ data Config =
     , width    :: Int
     , tab      :: Int
     , files    :: [FilePath]
-    , fg_empty :: Word8
-    , fg_error :: Word8
+    , fg_empty :: Maybe Word8
+    , fg_error :: Maybe Word8
     }
   deriving (Show, Data, Typeable)
 
@@ -53,14 +53,12 @@ config =
         help "The width at which to wrap lines (default: 100)"
     , tab = 4 &= typ "SIZE" &= help "The size of a tab in spaces (default: 4)"
     , fg_empty =
-        4 &= typ "COLOUR" &=
-        help
-          "The ISO colour code for empty (not yet typed) characters (default: 4)"
-    , fg_error =
-        1 &= typ "COLOUR" &= help "The ISO colour code for errors (default: 1)"
+        def &= typ "COLOUR" &=
+        help "The ISO colour code for empty (not yet typed) characters"
+    , fg_error = def &= typ "COLOUR" &= help "The ISO colour code for errors"
     , files = def &= args &= typ "FILES"
     } &=
-  summary "Gotta Go Fast 0.1.4.0" &=
+  summary "Gotta Go Fast 0.1.6.0" &=
   help "Practice typing and measure your WPM and accuracy" &=
   program "gotta-go-fast"
 
