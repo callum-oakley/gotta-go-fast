@@ -2,8 +2,6 @@ module UI
   ( run
   ) where
 
-import           Data.Word              (Word8)
-
 import           Brick                  (App (..), AttrName, BrickEvent (..),
                                          EventM, Location (..), Next, Widget,
                                          attrMap, attrName, continue,
@@ -12,12 +10,14 @@ import           Brick                  (App (..), AttrName, BrickEvent (..),
                                          str, withAttr, (<+>), (<=>))
 import           Brick.Widgets.Center   (center)
 import           Control.Monad.IO.Class (liftIO)
+import           Data.Char              (isSpace)
+import           Data.Maybe             (fromMaybe)
 import           Data.Time              (getCurrentTime)
+import           Data.Word              (Word8)
 import           Graphics.Vty           (Attr, Color (..), Event (..), Key (..),
                                          Modifier (..), bold, defAttr,
                                          withStyle)
 
-import           Data.Maybe             (fromMaybe)
 import           GottaGoFast
 
 emptyAttrName :: AttrName
@@ -63,21 +63,16 @@ draw s
   where
     p = padAll 1 $ showCursor () (Location $ cursor s) $ drawPage s
 
-handleEnter :: State -> EventM () (Next State)
-handleEnter s
-  | not $ onLastLine s = continue $ applyEnter s
-  | isComplete $ applyChar '\n' s = do
-    now <- liftIO getCurrentTime
-    continue $ stopClock now s
-  | otherwise = continue s
-
 handleChar :: Char -> State -> EventM () (Next State)
 handleChar c s
-  | c == ' ' && atEndOfLine s = handleEnter s
+  | isSpace c && (isComplete $ applyWhitespace s) = do
+    now <- liftIO getCurrentTime
+    continue $ stopClock now s
+  | isSpace c = continue $ applyWhitespace s
   | hasStarted s = continue $ applyChar c s
   | otherwise = do
     now <- liftIO getCurrentTime
-    continue $ applyChar c $ startClock now s
+    continue . applyChar c $ startClock now s
 
 handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
 handleEvent s (VtyEvent (EvKey key [MCtrl])) =
@@ -93,11 +88,10 @@ handleEvent s (VtyEvent (EvKey key []))
       _      -> continue s
   | otherwise =
     case key of
-      KChar '\t' -> continue $ applyTab s
-      KChar c    -> handleChar c s
-      KEnter     -> handleEnter s
-      KBS        -> continue $ applyBackspace s
-      _          -> continue s
+      KChar c -> handleChar c s
+      KEnter  -> handleChar '\n' s
+      KBS     -> continue $ applyBackspace s
+      _       -> continue s
 handleEvent s _ = continue s
 
 app :: Attr -> Attr -> App State e ()

@@ -7,8 +7,7 @@ module GottaGoFast
   , applyBackspace
   , applyBackspaceWord
   , applyChar
-  , applyEnter
-  , applyTab
+  , applyWhitespace
   , atEndOfLine
   , cursor
   , hasEnded
@@ -24,6 +23,7 @@ module GottaGoFast
   , wpm
   ) where
 
+import           Data.Char  (isSpace)
 import           Data.List  (isPrefixOf)
 import           Data.Maybe (fromJust, isJust)
 import           Data.Time  (UTCTime, diffUTCTime)
@@ -102,9 +102,6 @@ applyChar c s =
   where
     s' = s {input = input s ++ [c], strokes = strokes s + 1}
 
-applyEnter :: State -> State
-applyEnter = applyTab . applyChar '\n'
-
 backspace :: String -> String
 backspace "" = ""
 backspace xs = init xs
@@ -118,22 +115,24 @@ backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
 applyBackspaceWord :: State -> State
 applyBackspaceWord s = s {input = backspaceWord $ input s}
 
-applyTab :: State -> State
-applyTab s = s {input = input s ++ drop (cursorCol s) leadingSpaces}
+applyWhitespace :: State -> State
+applyWhitespace s = s {input = input s ++ whitespace}
   where
-    leadingSpaces = takeWhile (== ' ') $ lines (target s) !! cursorRow s
+    whitespace =
+      case takeWhile isSpace . drop (length $ input s) $ target s of
+        "" -> " "
+        ws -> ws
 
 initialState :: String -> State
 initialState t =
-  applyTab
-    State
-      { target = t
-      , input = ""
-      , start = Nothing
-      , end = Nothing
-      , strokes = 0
-      , hits = 0
-      }
+  State
+    { target = t
+    , input = takeWhile isSpace t
+    , start = Nothing
+    , end = Nothing
+    , strokes = 0
+    , hits = 0
+    }
 
 character :: Position -> (Maybe Char, Maybe Char) -> Character
 character _ (Just t, Just i)
