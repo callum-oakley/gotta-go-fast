@@ -11,6 +11,13 @@ From source:
     $ cd gotta-go-fast
     $ stack install
 
+Download binary (macOS only):
+
+    $ DEST=~/.local/bin/gotta-go-fast
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.2.0.1/macos -fLo $DEST
+
+Where `DEST` is somewhere in your `PATH`
+
 ## Usage
 
 Pass `gotta-go-fast` the name of a file, and it will extract a random 20 line
