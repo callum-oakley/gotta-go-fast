@@ -5,7 +5,6 @@ module GottaGoFast
   , State
   , accuracy
   , applyBackspace
-  , applyBackspaceWord
   , applyChar
   , applyWhitespace
   , atEndOfLine
@@ -102,18 +101,13 @@ applyChar c s =
   where
     s' = s {input = input s ++ [c], strokes = strokes s + 1}
 
-backspace :: String -> String
-backspace "" = ""
-backspace xs = init xs
-
 applyBackspace :: State -> State
-applyBackspace s = s {input = backspace $ input s}
-
-backspaceWord :: String -> String
-backspaceWord xs = reverse $ dropWhile (/= ' ') $ reverse $ backspace xs
-
-applyBackspaceWord :: State -> State
-applyBackspaceWord s = s {input = backspaceWord $ input s}
+applyBackspace s = s {input = reverse . drop n . reverse $ input s}
+  where
+    n =
+      case takeWhile isSpace . reverse $ input s of
+        "" -> 1
+        ws -> length ws
 
 applyWhitespace :: State -> State
 applyWhitespace s = s {input = input s ++ whitespace}
