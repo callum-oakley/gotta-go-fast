@@ -14,7 +14,7 @@ From source:
 Download binary (macOS only):
 
     $ DEST=~/.local/bin/gotta-go-fast
-    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.2.0.1/macos -fLo $DEST
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.2.1.0/macos -fLo $DEST
 
 Where `DEST` is somewhere in your `PATH`
 

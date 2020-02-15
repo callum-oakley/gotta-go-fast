@@ -58,7 +58,7 @@ config =
     , fg_error = def &= typ "COLOUR" &= help "The ISO colour code for errors"
     , files = def &= args &= typ "FILES"
     } &=
-  summary "Gotta Go Fast 0.2.0.1" &=
+  summary "Gotta Go Fast 0.2.1.0" &=
   help "Practice typing and measure your WPM and accuracy" &=
   program "gotta-go-fast"
 
