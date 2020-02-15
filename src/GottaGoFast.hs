@@ -5,6 +5,7 @@ module GottaGoFast
   , State
   , accuracy
   , applyBackspace
+  , applyBackspaceWord
   , applyChar
   , applyWhitespace
   , atEndOfLine
@@ -108,6 +109,16 @@ applyBackspace s = s {input = reverse . drop n . reverse $ input s}
       case takeWhile isSpace . reverse $ input s of
         "" -> 1
         ws -> length ws
+
+applyBackspaceWord :: State -> State
+applyBackspaceWord s = s {input = reverse . drop n . reverse $ input s}
+  where
+    n = toWordBeginning . reverse $ input s
+    toWordBeginning "" = 0
+    toWordBeginning [c] = 1
+    toWordBeginning (x:y:ys)
+      | (not $ isSpace x) && isSpace y = 1
+      | otherwise = 1 + toWordBeginning (y : ys)
 
 applyWhitespace :: State -> State
 applyWhitespace s = s {input = input s ++ whitespace}

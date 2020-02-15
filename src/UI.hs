@@ -79,7 +79,13 @@ handleEvent s (VtyEvent (EvKey key [MCtrl])) =
   case key of
     KChar 'c' -> halt s
     KChar 'd' -> halt s
+    KChar 'w' -> continue $ applyBackspaceWord s
+    KBS       -> continue $ applyBackspaceWord s
     _         -> continue s
+handleEvent s (VtyEvent (EvKey key [MAlt])) =
+  case key of
+    KBS -> continue $ applyBackspaceWord s
+    _   -> continue s
 handleEvent s (VtyEvent (EvKey key []))
   | hasEnded s =
     case key of
