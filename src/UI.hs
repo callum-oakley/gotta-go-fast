@@ -53,7 +53,7 @@ drawResults s =
   show (round $ wpm s) ++
   "\n\n" ++ "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
   where
-    x = show $ noOfChars s
+    x = show $ countChars s
     y = show $ round $ seconds s
 
 draw :: State -> [Widget ()]

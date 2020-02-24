@@ -10,11 +10,11 @@ module GottaGoFast
   , applyWhitespace
   , atEndOfLine
   , cursor
+  , countChars
   , hasEnded
   , hasStarted
   , initialState
   , isComplete
-  , noOfChars
   , onLastLine
   , page
   , seconds
@@ -24,7 +24,7 @@ module GottaGoFast
   ) where
 
 import           Data.Char  (isSpace)
-import           Data.List  (isPrefixOf)
+import           Data.List  (groupBy, isPrefixOf)
 import           Data.Maybe (fromJust, isJust)
 import           Data.Time  (UTCTime, diffUTCTime)
 
@@ -170,8 +170,11 @@ noOfChars = length . input
 seconds :: State -> Rational
 seconds s = toRational $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
 
+countChars :: State -> Int
+countChars = length . groupBy (\x y -> isSpace x && isSpace y) . target
+
 wpm :: State -> Rational
-wpm s = fromIntegral (length $ target s) / (5 * seconds s / 60)
+wpm s = fromIntegral (countChars s) / (5 * seconds s / 60)
 
 accuracy :: State -> Rational
 accuracy s = fromIntegral (hits s) / fromIntegral (strokes s)
