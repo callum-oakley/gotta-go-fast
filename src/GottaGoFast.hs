@@ -117,7 +117,7 @@ applyBackspaceWord s = s {input = reverse . drop n . reverse $ input s}
     toWordBeginning "" = 0
     toWordBeginning [c] = 1
     toWordBeginning (x:y:ys)
-      | (not $ isSpace x) && isSpace y = 1
+      | not (isSpace x) && isSpace y = 1
       | otherwise = 1 + toWordBeginning (y : ys)
 
 applyWhitespace :: State -> State

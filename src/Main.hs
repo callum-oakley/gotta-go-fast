@@ -49,8 +49,8 @@ config =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
     , width =
-        100 &= typ "CHARS" &=
-        help "The width at which to wrap lines (default: 100)"
+        80 &= typ "CHARS" &=
+        help "The width at which to wrap lines (default: 80)"
     , tab = 4 &= typ "SIZE" &= help "The size of a tab in spaces (default: 4)"
     , fg_empty =
         def &= typ "COLOUR" &=
@@ -58,7 +58,7 @@ config =
     , fg_error = def &= typ "COLOUR" &= help "The ISO colour code for errors"
     , files = def &= args &= typ "FILES"
     } &=
-  summary "Gotta Go Fast 0.2.1.0" &=
+  summary "Gotta Go Fast 0.2.1.1" &=
   help "Practice typing and measure your WPM and accuracy" &=
   program "gotta-go-fast"
 

@@ -65,7 +65,7 @@ draw s
 
 handleChar :: Char -> State -> EventM () (Next State)
 handleChar c s
-  | isSpace c && (isComplete $ applyWhitespace s) = do
+  | isSpace c && isComplete (applyWhitespace s) = do
     now <- liftIO getCurrentTime
     continue $ stopClock now s
   | isSpace c = continue $ applyWhitespace s
@@ -83,6 +83,10 @@ handleEvent s (VtyEvent (EvKey key [MCtrl])) =
     KBS       -> continue $ applyBackspaceWord s
     _         -> continue s
 handleEvent s (VtyEvent (EvKey key [MAlt])) =
+  case key of
+    KBS -> continue $ applyBackspaceWord s
+    _   -> continue s
+handleEvent s (VtyEvent (EvKey key [MMeta])) =
   case key of
     KBS -> continue $ applyBackspaceWord s
     _   -> continue s
@@ -117,5 +121,5 @@ run fgEmptyCode fgErrorCode t = do
   _ <- defaultMain (app emptyAttr errorAttr) $ initialState t
   return ()
   where
-    emptyAttr = fg $ maybe (Color240 231) ISOColor fgEmptyCode
+    emptyAttr = fg . ISOColor $ fromMaybe 8 fgEmptyCode
     errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode
