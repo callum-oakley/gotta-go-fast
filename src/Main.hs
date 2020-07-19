@@ -30,6 +30,7 @@ data Config =
     , fg_empty  :: Maybe Word8
     , fg_error  :: Maybe Word8
     , paragraph :: Bool
+    , reflow_   :: Bool
     }
   deriving (Show, Data, Typeable)
 
@@ -54,6 +55,7 @@ config :: Config
 config =
   Config
     { paragraph = def &= help "Sample a single paragraph from the input files"
+    , reflow_ = def &= help "Reflow paragraph to the target width"
     , height =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
@@ -76,19 +78,31 @@ sample c file =
   if paragraph c
     then sampleParagraph
     else sampleLines
-    -- TODO option to reflow paragraph text
   where
     sampleParagraph = do
       r <- randomRIO (0, length paragraphs - 1)
-      return $ paragraphs !! r
+      return .
+        (if reflow_ c
+           then reflow
+           else id) $
+        paragraphs !! r
     sampleLines = do
       r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
-      return $
-        trimEmptyLines $ chop $ wrap $ chop $ unlines $ drop r $ lines ascii
+      return . trimEmptyLines . chop . wrap . chop . unlines . drop r $
+        lines ascii
     paragraphs =
       filter ((\l -> l >= minParagraphLen && l <= maxParagraphLen) . length) .
       map unlines . splitOn [""] . lines $
       ascii
+    reflow s =
+      (wrap .
+       map
+         (\c ->
+            if c == '\n'
+              then ' '
+              else c) $
+       s) ++
+      "\n"
     ascii = toAscii (tab c) file
     chop = unlines . take (height c) . lines
     wrap = T.unpack . wrapText wrapSettings (width c) . T.pack
