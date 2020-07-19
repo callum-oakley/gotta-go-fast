@@ -15,11 +15,16 @@ import           Text.Wrap              (WrapSettings (..), wrapText)
 
 import           UI                     (run)
 
+-- TODO expose these as options
 minParagraphLen :: Int
-minParagraphLen = 100
+minParagraphLen = 200
 
 maxParagraphLen :: Int
-maxParagraphLen = 500
+maxParagraphLen = 800
+
+-- This makes for a 60 second test at 100 WPM
+nonsenseLen :: Int
+nonsenseLen = 500
 
 data Config =
   Config
@@ -73,6 +78,11 @@ config =
   help "Practice typing and measure your WPM and accuracy" &=
   program "gotta-go-fast"
 
+wrap :: Int -> String -> String
+wrap width = T.unpack . wrapText wrapSettings width . T.pack
+
+wrapSettings = WrapSettings {preserveIndentation = True, breakLongWords = True}
+
 sample :: Config -> String -> IO String
 sample c file =
   if paragraph c
@@ -88,14 +98,14 @@ sample c file =
         paragraphs !! r
     sampleLines = do
       r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
-      return . trimEmptyLines . chop . wrap . chop . unlines . drop r $
+      return . trimEmptyLines . chop . wrap (width c) . chop . unlines . drop r $
         lines ascii
     paragraphs =
       filter ((\l -> l >= minParagraphLen && l <= maxParagraphLen) . length) .
       map unlines . splitOn [""] . lines $
       ascii
     reflow s =
-      (wrap .
+      (wrap (width c) .
        map
          (\c ->
             if c == '\n'
@@ -105,16 +115,133 @@ sample c file =
       "\n"
     ascii = toAscii (tab c) file
     chop = unlines . take (height c) . lines
-    wrap = T.unpack . wrapText wrapSettings (width c) . T.pack
-    wrapSettings =
-      WrapSettings {preserveIndentation = True, breakLongWords = True}
+
+-- taken from https://en.wikipedia.org/wiki/Most_common_words_in_English
+-- TODO options for expanded word lists
+topHundredWords :: [String]
+topHundredWords =
+  [ "the"
+  , "be"
+  , "to"
+  , "of"
+  , "and"
+  , "a"
+  , "in"
+  , "that"
+  , "have"
+  , "I"
+  , "it"
+  , "for"
+  , "not"
+  , "on"
+  , "with"
+  , "he"
+  , "as"
+  , "you"
+  , "do"
+  , "at"
+  , "this"
+  , "but"
+  , "his"
+  , "by"
+  , "from"
+  , "they"
+  , "we"
+  , "say"
+  , "her"
+  , "she"
+  , "or"
+  , "an"
+  , "will"
+  , "my"
+  , "one"
+  , "all"
+  , "would"
+  , "there"
+  , "their"
+  , "what"
+  , "so"
+  , "up"
+  , "out"
+  , "if"
+  , "about"
+  , "who"
+  , "get"
+  , "which"
+  , "go"
+  , "me"
+  , "when"
+  , "make"
+  , "can"
+  , "like"
+  , "time"
+  , "no"
+  , "just"
+  , "him"
+  , "know"
+  , "take"
+  , "people"
+  , "into"
+  , "year"
+  , "your"
+  , "good"
+  , "some"
+  , "could"
+  , "them"
+  , "see"
+  , "other"
+  , "than"
+  , "then"
+  , "now"
+  , "look"
+  , "only"
+  , "come"
+  , "its"
+  , "over"
+  , "think"
+  , "also"
+  , "back"
+  , "after"
+  , "use"
+  , "two"
+  , "how"
+  , "our"
+  , "work"
+  , "first"
+  , "well"
+  , "way"
+  , "even"
+  , "new"
+  , "want"
+  , "because"
+  , "any"
+  , "these"
+  , "give"
+  , "day"
+  , "most"
+  , "us"
+  ]
+
+nonsense :: Config -> IO String
+nonsense c = do
+  words <- go nonsenseLen
+  return $ (wrap (width c) . unwords $ words) ++ "\n"
+  where
+    go :: Int -> IO [String]
+    go n
+      | n <= 0 = return []
+      | otherwise = do
+        r <- randomRIO (0, length topHundredWords - 1)
+        let word = topHundredWords !! r
+        rest <- go (n - length word)
+        return $ word : rest
 
 main :: IO ()
 main = do
   c <- cmdArgs config
   fs <- filterM doesFileExist $ files c
   case fs of
-    [] -> putStrLn "Requires at least one file path"
+    [] -> nonsense c >>= run (fg_empty c) (fg_error c)
     _ -> do
       r <- randomRIO (0, length fs - 1)
       file <- readFile $ fs !! r
