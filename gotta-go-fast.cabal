@@ -28,4 +28,5 @@ executable gotta-go-fast
                      , random
                      , time
                      , vty
+                     , split
   default-language:    Haskell2010

@@ -4,6 +4,7 @@ module Main where
 
 import           Control.Monad          (filterM)
 import           Data.Char              (isAscii, isPrint)
+import           Data.List.Split        (splitOn)
 import qualified Data.Text              as T
 import           Data.Word              (Word8)
 import           System.Console.CmdArgs (Data, Typeable, args, cmdArgs, def,
@@ -14,14 +15,21 @@ import           Text.Wrap              (WrapSettings (..), wrapText)
 
 import           UI                     (run)
 
+minParagraphLen :: Int
+minParagraphLen = 100
+
+maxParagraphLen :: Int
+maxParagraphLen = 500
+
 data Config =
   Config
-    { height   :: Int
-    , width    :: Int
-    , tab      :: Int
-    , files    :: [FilePath]
-    , fg_empty :: Maybe Word8
-    , fg_error :: Maybe Word8
+    { height    :: Int
+    , width     :: Int
+    , tab       :: Int
+    , files     :: [FilePath]
+    , fg_empty  :: Maybe Word8
+    , fg_error  :: Maybe Word8
+    , paragraph :: Bool
     }
   deriving (Show, Data, Typeable)
 
@@ -45,7 +53,8 @@ trimEmptyLines = (++ "\n") . f . f
 config :: Config
 config =
   Config
-    { height =
+    { paragraph = def &= help "Sample a single paragraph from the input files"
+    , height =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
     , width =
@@ -63,10 +72,23 @@ config =
   program "gotta-go-fast"
 
 sample :: Config -> String -> IO String
-sample c file = do
-  r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
-  return $ trimEmptyLines $ chop $ wrap $ chop $ unlines $ drop r $ lines ascii
+sample c file =
+  if paragraph c
+    then sampleParagraph
+    else sampleLines
+    -- TODO option to reflow paragraph text
   where
+    sampleParagraph = do
+      r <- randomRIO (0, length paragraphs - 1)
+      return $ paragraphs !! r
+    sampleLines = do
+      r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
+      return $
+        trimEmptyLines $ chop $ wrap $ chop $ unlines $ drop r $ lines ascii
+    paragraphs =
+      filter ((\l -> l >= minParagraphLen && l <= maxParagraphLen) . length) .
+      map unlines . splitOn [""] . lines $
+      ascii
     ascii = toAscii (tab c) file
     chop = unlines . take (height c) . lines
     wrap = T.unpack . wrapText wrapSettings (width c) . T.pack
