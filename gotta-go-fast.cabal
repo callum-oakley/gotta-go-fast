@@ -29,4 +29,5 @@ executable gotta-go-fast
                      , time
                      , vty
                      , split
+                     , file-embed
   default-language:    Haskell2010
