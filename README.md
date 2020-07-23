@@ -20,6 +20,8 @@ Where `DEST` is somewhere in your `PATH`
 
 ## Usage
 
+TODO screenshot for each mode
+
 ![screenshot](img/screenshot.png)
 
 `gotta-go-fast` has three modes of operation:

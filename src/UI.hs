@@ -3,10 +3,11 @@ module UI
   ) where
 
 import           Brick                  (App (..), AttrName, BrickEvent (..),
-                                         EventM, Location (..), Next, Widget,
-                                         attrMap, attrName, continue,
-                                         defaultMain, emptyWidget, fg, halt,
-                                         padAll, showCursor, showFirstCursor,
+                                         EventM, Location (..), Next,
+                                         Padding (..), Widget, attrMap,
+                                         attrName, continue, defaultMain,
+                                         emptyWidget, fg, halt, padAll,
+                                         padBottom, showCursor, showFirstCursor,
                                          str, withAttr, (<+>), (<=>))
 import           Brick.Widgets.Center   (center)
 import           Control.Monad.IO.Class (liftIO)
@@ -26,6 +27,9 @@ emptyAttrName = attrName "empty"
 errorAttrName :: AttrName
 errorAttrName = attrName "error"
 
+resultAttrName :: AttrName
+resultAttrName = attrName "result"
+
 drawCharacter :: Character -> Widget ()
 drawCharacter (Hit c)    = str [c]
 drawCharacter (Miss ' ') = withAttr errorAttrName $ str ['_']
@@ -38,30 +42,21 @@ drawLine :: Line -> Widget ()
 drawLine [] = str " "
 drawLine ls = foldl1 (<+>) $ map drawCharacter ls
 
-drawPage :: State -> Widget ()
-drawPage s = foldl (<=>) emptyWidget $ map drawLine $ page s
+drawText :: State -> Widget ()
+drawText s = padBottom (Pad 2) . foldl (<=>) emptyWidget . map drawLine $ page s
 
 drawResults :: State -> Widget ()
 drawResults s =
-  str $
-  "You typed " ++
-  x ++
-  " characters in " ++
-  y ++
-  " seconds.\n\n" ++
-  "Words per minute: " ++
-  show (round $ wpm s) ++
-  "\n\n" ++ "Accuracy: " ++ show (round $ accuracy s * 100) ++ "%"
-  where
-    x = show $ countChars s
-    y = show $ round $ seconds s
+  withAttr resultAttrName . str $
+  (show . round $ wpm s) ++
+  " words per minute • " ++ (show . round $ accuracy s * 100) ++ "% accuracy"
 
 draw :: State -> [Widget ()]
 draw s
-  | hasEnded s = pure $ center $ drawResults s
-  | otherwise = pure $ center p
-  where
-    p = padAll 1 $ showCursor () (Location $ cursor s) $ drawPage s
+  | hasEnded s = pure . center . padAll 1 $ drawText s <=> drawResults s
+  | otherwise =
+    pure . center . padAll 1 . showCursor () (Location $ cursor s) $
+    drawText s <=> str " "
 
 handleChar :: Char -> State -> EventM () (Next State)
 handleChar c s
@@ -104,8 +99,8 @@ handleEvent s (VtyEvent (EvKey key []))
       _       -> continue s
 handleEvent s _ = continue s
 
-app :: Attr -> Attr -> App State e ()
-app emptyAttr errorAttr =
+app :: Attr -> Attr -> Attr -> App State e ()
+app emptyAttr errorAttr resultAttr =
   App
     { appDraw = draw
     , appChooseCursor = showFirstCursor
@@ -113,13 +108,20 @@ app emptyAttr errorAttr =
     , appStartEvent = return
     , appAttrMap =
         const $
-        attrMap defAttr [(emptyAttrName, emptyAttr), (errorAttrName, errorAttr)]
+        attrMap
+          defAttr
+          [ (emptyAttrName, emptyAttr)
+          , (errorAttrName, errorAttr)
+          , (resultAttrName, resultAttr)
+          ]
     }
 
 run :: Maybe Word8 -> Maybe Word8 -> String -> IO ()
 run fgEmptyCode fgErrorCode t = do
-  _ <- defaultMain (app emptyAttr errorAttr) $ initialState t
+  _ <- defaultMain (app emptyAttr errorAttr resultAttr) $ initialState t
   return ()
   where
     emptyAttr = fg . ISOColor $ fromMaybe 6 fgEmptyCode
     errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode
+    -- abusing the fgErrorCode to use as a highlight colour for the results here
+    resultAttr = fg . ISOColor $ fromMaybe 1 fgErrorCode
