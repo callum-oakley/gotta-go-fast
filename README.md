@@ -20,29 +20,28 @@ Where `DEST` is somewhere in your `PATH`
 
 ## Usage
 
-Pass `gotta-go-fast` the name of a file, and it will extract a random 20 line
-section for you to type – or the whole thing if the file is short enough.
-You’ll get a WPM and accuracy report after typing through the whole sample
-**with no errors** (use backspace to go back and make corrections).
-
-    $ gotta-go-fast README.md
-
-Errors are highlighted in red.
-
 ![screenshot](img/screenshot.png)
 
-Pass `gotta-go-fast` more than one file, and it will choose one at random.
+`gotta-go-fast` has three modes of operation:
+
+### 1. Nonsense mode
+
+Run with no file inputs, it will generate nonsense which is statistically similar to English text. Words appear in the nonsense with the same frequency that they appear in actual English. The length of the nonsense can be specified with `--nonsense-len` (`-l`) (in characters).
+
+    $ gotta-go-fast
+
+### 2. Chunk mode
+
+Run with files to sample from, it will sample a random chunk from a random file as input. This works well for code or other text without a clear paragraph structure. Specify the height of the chunk in lines with `--height` (`-h`).
 
     $ gotta-go-fast src/*
 
-## Configuration
+### 3. Paragraph mode
 
-The maximum number of lines to sample, and the width at which to wrap them, can
-be changed by setting `--height` and `--width`.
+Run with files to sample from, and `--paragraph` (`-p`), it will sample a random paragraph (empty line delimited) from a random file. This works well for prose such as Project Gutenberg books. Reflow text to the target width with `--reflow` (`-r`). Specify the maximum and minimum length for a paragraph with `--max-paragraph-len` and `--min-paragraph-len` (in characters).
 
-The colour for untyped text and the colour for errors can be changed by setting
-`--fg-empty` and `--fg-error` to the appropriate [ISOColor
-code](https://hackage.haskell.org/package/vty-5.15.1/docs/Graphics-Vty-Attributes.html#t:Color).
-If you are greeted with a blank screen, you should try changing `--fg-empty`.
+    $ gotta-go-fast -p books/*.txt
 
-Run `gotta-go-fast --help` for details.
+In all three modes the width of the text can be set with `--width` (`-w`), the tab width can be set with `--tab` (`-t`) and the colour of empty (not yet typed) text and of errors can be set with `--fg-empty` and `--fg-error` (ANSI colour codes).
+
+Run with `--help` for details.
