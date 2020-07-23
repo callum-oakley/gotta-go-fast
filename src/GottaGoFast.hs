@@ -106,8 +106,9 @@ applyBackspace :: State -> State
 applyBackspace s = s {input = reverse . drop n . reverse $ input s}
   where
     n =
-      case takeWhile isSpace . reverse $ input s of
-        "" -> 1
+      case takeWhile (\(i, t) -> isSpace i && isSpace t) . reverse $
+           zip (input s) (target s) of
+        [] -> 1
         ws -> length ws
 
 applyBackspaceWord :: State -> State
