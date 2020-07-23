@@ -10,34 +10,27 @@ import           Data.List.Split        (splitOn)
 import qualified Data.Text              as T
 import           Data.Word              (Word8)
 import           System.Console.CmdArgs (Data, Typeable, args, cmdArgs, def,
-                                         help, program, summary, typ, (&=))
+                                         details, help, name, program, summary,
+                                         typ, (&=))
 import           System.Directory       (doesFileExist)
 import           System.Random          (randomRIO)
 import           Text.Wrap              (WrapSettings (..), wrapText)
 
 import           UI                     (run)
 
--- TODO expose these as options
-minParagraphLen :: Int
-minParagraphLen = 200
-
-maxParagraphLen :: Int
-maxParagraphLen = 800
-
--- This makes for a 60 second test at 100 WPM
-nonsenseLen :: Int
-nonsenseLen = 500
-
 data Config =
   Config
-    { height    :: Int
-    , width     :: Int
-    , tab       :: Int
-    , files     :: [FilePath]
-    , fg_empty  :: Maybe Word8
-    , fg_error  :: Maybe Word8
-    , paragraph :: Bool
-    , reflow_   :: Bool
+    { fg_empty          :: Maybe Word8
+    , fg_error          :: Maybe Word8
+    , files             :: [FilePath]
+    , height            :: Int
+    , max_paragraph_len :: Int
+    , min_paragraph_len :: Int
+    , nonsense_len      :: Int
+    , paragraph         :: Bool
+    , reflow_           :: Bool
+    , tab               :: Int
+    , width             :: Int
     }
   deriving (Show, Data, Typeable)
 
@@ -61,24 +54,34 @@ trimEmptyLines = (++ "\n") . f . f
 config :: Config
 config =
   Config
-    { paragraph = def &= help "Sample a single paragraph from the input files"
-    , reflow_ = def &= help "Reflow paragraph to the target width"
+    { fg_empty =
+        def &= typ "COLOUR" &=
+        help "The ANSI colour code for empty (not yet typed) text"
+    , fg_error = def &= typ "COLOUR" &= help "The ANSI colour code for errors"
     , height =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
+    , max_paragraph_len =
+        750 &= typ "WORDS" &=
+        help "The maximum length of a sampled paragraph (default: 750)"
+    , min_paragraph_len =
+        250 &= typ "WORDS" &=
+        help "The minimum length of a sampled paragraph (default: 250)"
+    , nonsense_len =
+        500 &= name "l" &= typ "WORDS" &=
+        help "The length of nonsense to generate (default: 500)"
+    , paragraph = def &= help "Sample a paragraph from the input files"
+    , reflow_ = def &= help "Reflow paragraph to the target width"
+    , tab = 4 &= typ "SIZE" &= help "The size of a tab in spaces (default: 4)"
     , width =
         80 &= typ "CHARS" &=
         help "The width at which to wrap lines (default: 80)"
-    , tab = 4 &= typ "SIZE" &= help "The size of a tab in spaces (default: 4)"
-    , fg_empty =
-        def &= typ "COLOUR" &=
-        help "The ISO colour code for empty (not yet typed) characters"
-    , fg_error = def &= typ "COLOUR" &= help "The ISO colour code for errors"
     , files = def &= args &= typ "FILES"
     } &=
   summary "Gotta Go Fast 0.2.1.1" &=
-  help "Practice typing and measure your WPM and accuracy" &=
-  program "gotta-go-fast"
+  help "Practice typing and measure your WPM and accuracy." &=
+  program "gotta-go-fast" &=
+  (details $ lines $(embedStringFile "details.txt"))
 
 wrap :: Int -> String -> String
 wrap width = T.unpack . wrapText wrapSettings width . T.pack
@@ -110,7 +113,7 @@ weightedRandomWord = do
 -- same as the frequency of words in actual usage.
 nonsense :: Config -> IO String
 nonsense c = do
-  words <- go nonsenseLen
+  words <- go $ nonsense_len c
   return $ (wrap (width c) . unwords $ words) ++ "\n"
   where
     go :: Int -> IO [String]
@@ -118,7 +121,7 @@ nonsense c = do
       | n <= 0 = return []
       | otherwise = do
         word <- weightedRandomWord
-        rest <- go (n - length word)
+        rest <- go (n - length word - 1) -- extra 1 to count the space
         return $ word : rest
 
 sample :: Config -> String -> IO String
@@ -139,7 +142,8 @@ sample c file =
       return . trimEmptyLines . chop . wrap (width c) . chop . unlines . drop r $
         lines ascii
     paragraphs =
-      filter ((\l -> l >= minParagraphLen && l <= maxParagraphLen) . length) .
+      filter
+        ((\l -> l >= min_paragraph_len c && l <= max_paragraph_len c) . length) .
       map unlines . splitOn [""] . lines $
       ascii
     reflow s =
