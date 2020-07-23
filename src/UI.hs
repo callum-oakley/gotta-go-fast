@@ -121,5 +121,5 @@ run fgEmptyCode fgErrorCode t = do
   _ <- defaultMain (app emptyAttr errorAttr) $ initialState t
   return ()
   where
-    emptyAttr = fg . ISOColor $ fromMaybe 8 fgEmptyCode
+    emptyAttr = fg . ISOColor $ fromMaybe 6 fgEmptyCode
     errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode
