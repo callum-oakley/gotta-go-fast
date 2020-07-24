@@ -11,12 +11,12 @@ From source:
     $ cd gotta-go-fast
     $ stack install
 
-Download binary (macOS only):
+Download binary (macOS only for now):
 
     $ DEST=~/.local/bin/gotta-go-fast
     $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.0/macos -fLo $DEST
 
-Where `DEST` is somewhere in your `PATH`
+Where `DEST` is somewhere in your `PATH`.
 
 ## Usage
 
