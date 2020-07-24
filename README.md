@@ -20,7 +20,7 @@ Where `DEST` is somewhere in your `PATH`
 
 ## Usage
 
-`gotta-go-fast` has three modes of operation:
+`gotta-go-fast` has three modes of operation. In all three modes, type through the presented text and then submit with enter. You **must** correct your mistakes before you can submit.
 
 ### 1. Nonsense mode
 

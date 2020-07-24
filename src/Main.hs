@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE LambdaCase         #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
 module Main where
@@ -132,11 +133,12 @@ sample c file =
   where
     sampleParagraph = do
       r <- randomRIO (0, length paragraphs - 1)
-      return .
-        (if reflow_ c
-           then reflow
-           else id) $
-        paragraphs !! r
+      return $
+        ((if reflow_ c
+            then reflow
+            else wrap (width c)) $
+         paragraphs !! r) ++
+        "\n"
     sampleLines = do
       r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
       return . trimEmptyLines . chop . wrap (width c) . chop . unlines . drop r $
@@ -147,14 +149,12 @@ sample c file =
       map unlines . splitOn [""] . lines $
       ascii
     reflow s =
-      (wrap (width c) .
-       map
-         (\c ->
-            if c == '\n'
-              then ' '
-              else c) $
-       s) ++
-      "\n"
+      wrap (width c) .
+      map
+        (\case
+           '\n' -> ' '
+           c -> c) $
+      s
     ascii = toAscii (tab c) file
     chop = unlines . take (height c) . lines
 
