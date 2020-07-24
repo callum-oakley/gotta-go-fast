@@ -19,7 +19,7 @@ executable gotta-go-fast
                      , UI
   main-is:             Main.hs
   ghc-options:         -threaded
-  build-depends:       base >=4.9 && <4.11
+  build-depends:       base >=4.7 && <5
                      , brick >= 0.21
                      , word-wrap >= 0.4.1
                      , text

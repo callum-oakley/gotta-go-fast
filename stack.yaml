@@ -7,7 +7,4 @@ extra-package-dbs: []
 packages:
 - .
 extra-deps:
-- brick-0.21
-- data-clist-0.1.2.0
-- word-wrap-0.4.1
-resolver: lts-8.23
+resolver: lts-16.6
