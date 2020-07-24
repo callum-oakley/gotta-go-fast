@@ -20,17 +20,15 @@ Where `DEST` is somewhere in your `PATH`
 
 ## Usage
 
-TODO screenshot for each mode
-
-![screenshot](img/screenshot.png)
-
 `gotta-go-fast` has three modes of operation:
 
 ### 1. Nonsense mode
 
 Run with no file inputs, it will generate nonsense which is statistically similar to English text. Words appear in the nonsense with the same frequency that they appear in actual English. The length of the nonsense can be specified with `--nonsense-len` (`-l`) (in characters).
 
-    $ gotta-go-fast
+    $ gotta-go-fast -w 60
+
+![screenshot](img/nonsense.png)
 
 ### 2. Chunk mode
 
@@ -38,11 +36,15 @@ Run with files to sample from, it will sample a random chunk from a random file 
 
     $ gotta-go-fast src/*
 
+![screenshot](img/chunk.png)
+
 ### 3. Paragraph mode
 
 Run with files to sample from, and `--paragraph` (`-p`), it will sample a random paragraph (empty line delimited) from a random file. This works well for prose such as Project Gutenberg books. Reflow text to the target width with `--reflow` (`-r`). Specify the maximum and minimum length for a paragraph with `--max-paragraph-len` and `--min-paragraph-len` (in characters).
 
-    $ gotta-go-fast -p books/*.txt
+    $ gotta-go-fast -prw 60 README.md
+
+![screenshot](img/paragraph.png)
 
 In all three modes the width of the text can be set with `--width` (`-w`), the tab width can be set with `--tab` (`-t`) and the colour of empty (not yet typed) text and of errors can be set with `--fg-empty` and `--fg-error` (ANSI colour codes).
 
