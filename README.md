@@ -5,16 +5,21 @@ accuracy. Written with [brick](https://github.com/jtdaugherty/brick).
 
 ## Installation
 
-From source:
+From source using [Stack](https://docs.haskellstack.org):
 
     $ git clone https://github.com/callum-oakley/gotta-go-fast
     $ cd gotta-go-fast
     $ stack install
 
-Download binary (macOS only for now):
+Download binary (macOS):
 
     $ DEST=~/.local/bin/gotta-go-fast
     $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.0/macos -fLo $DEST
+
+Download binary (linux):
+
+    $ DEST=~/.local/bin/gotta-go-fast
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.0/linux -fLo $DEST
 
 Where `DEST` is somewhere in your `PATH`.
 
