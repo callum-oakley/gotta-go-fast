@@ -89,13 +89,14 @@ handleEvent s (VtyEvent (EvKey key []))
   | hasEnded s =
     case key of
       KEnter -> halt s
-      KEsc   -> halt s
+      KEsc   -> halt $ s {loop = True}
       _      -> continue s
   | otherwise =
     case key of
       KChar c -> handleChar c s
       KEnter  -> handleChar '\n' s
       KBS     -> continue $ applyBackspace s
+      KEsc    -> halt $ s {loop = True}
       _       -> continue s
 handleEvent s _ = continue s
 
@@ -116,10 +117,10 @@ app emptyAttr errorAttr resultAttr =
           ]
     }
 
-run :: Maybe Word8 -> Maybe Word8 -> String -> IO ()
+run :: Maybe Word8 -> Maybe Word8 -> String -> IO Bool
 run fgEmptyCode fgErrorCode t = do
-  _ <- defaultMain (app emptyAttr errorAttr resultAttr) $ initialState t
-  return ()
+  s <- defaultMain (app emptyAttr errorAttr resultAttr) $ initialState t
+  return $ loop s
   where
     emptyAttr = fg . ISOColor $ fromMaybe 8 fgEmptyCode
     errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode

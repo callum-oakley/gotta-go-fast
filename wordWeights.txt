@@ -523,7 +523,6 @@ free	5433
 hands	5428
 serious	5390
 Leo	5390
-shit	5388
 behind	5388
 inside	5379
 high	5377
@@ -599,7 +598,6 @@ seeing	4495
 sound	4488
 fault	4484
 water	4469
-fuck	4453
 ten	4448
 women	4441
 John	4413
@@ -655,7 +653,6 @@ boys	3888
 relationship	3880
 Michael	3878
 loves	3876
-fucking	3843
 hair	3839
 lying	3837
 choice	3828
@@ -1413,7 +1410,6 @@ price	1402
 goodbye	1402
 condition	1400
 guard	1398
-fuckin'	1398
 grow	1396
 cake	1395
 mood	1393
@@ -2058,7 +2054,6 @@ stronger	844
 block	844
 aah	844
 Newman	843
-bullshit	843
 pie	842
 handsome	842
 unbelievable	841
@@ -2288,7 +2283,6 @@ honeymoon	733
 wet	732
 bail	732
 parking	731
-fucked	731
 non	730
 hung	730
 protection	727
@@ -2523,7 +2517,6 @@ reputation	636
 balls	636
 attacked	636
 among	635
-lt	634
 knowledge	634
 presents	633
 inn	633
@@ -3875,7 +3868,6 @@ customer	341
 bizarre	341
 scaring	340
 punk	340
-motherfucker	340
 holds	340
 focused	340
 Angeles	340
@@ -5480,7 +5472,6 @@ sophisticated	204
 Ron	204
 religion	204
 luggage	204
-ll	204
 lemon	204
 investigate	204
 hike	204
@@ -5672,7 +5663,6 @@ innocence	193
 indicate	193
 grandmother's	193
 Gail	193
-fucker	193
 freaky	193
 forehead	193
 Foley	193
@@ -6039,7 +6029,6 @@ Rita	174
 questioned	174
 peek	174
 outrageous	174
-nigger	174
 medal	174
 Kiriakis	174
 insulted	174
@@ -6770,7 +6759,6 @@ protocol	146
 nickel	146
 nana	146
 Livvie's	146
-jt	146
 garlic	146
 foreman	146
 decency	146
@@ -7661,7 +7649,6 @@ Kansas	119
 housing	119
 hearted	119
 guarantees	119
-fucks	119
 folk	119
 flown	119
 feast	119
@@ -8153,7 +8140,6 @@ tropical	107
 thumbs	107
 throats	107
 slippery	107
-shitty	107
 seduced	107
 ridge's	107
 reform	107
@@ -9344,12 +9330,10 @@ dictate	86
 dependent	86
 decorating	86
 Daryl	86
-cunt	86
 cope	86
 coordinates	86
 cola	86
 cocktails	86
-cocksucker	86
 bumps	86
 blueberry	86
 blackout	86

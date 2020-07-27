@@ -2,7 +2,7 @@ module GottaGoFast
   ( Character(..)
   , Line
   , Page
-  , State
+  , State(..)
   , accuracy
   , applyBackspace
   , applyBackspaceWord
@@ -43,6 +43,7 @@ data State =
     , end     :: Maybe UTCTime
     , strokes :: Integer
     , hits    :: Integer
+    , loop    :: Bool
     }
 
 -- For ease of rendering a character in the UI, we tag it as a Hit, Miss, or
@@ -138,6 +139,7 @@ initialState t =
     , end = Nothing
     , strokes = 0
     , hits = 0
+    , loop = False
     }
 
 character :: Position -> (Maybe Char, Maybe Char) -> Character

@@ -1,4 +1,4 @@
-gotta-go-fast has three modes of operation. In all three modes, type through the presented text and then submit with enter. You MUST correct your mistakes before you can submit.
+gotta-go-fast has three modes of operation. In all three modes, type through the presented text and then submit with ENTER. You MUST correct your mistakes before you can submit. Press ESC at any time to restart.
 
 1. NONSENSE MODE Run with no file inputs, it will generate nonsense which is statistically similar to English text. Words appear in the nonsense with the same frequency that they appear in actual English. The length of the nonsense can be specified with --nonsense-len (-l) (in characters).
 

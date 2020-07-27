@@ -14,18 +14,18 @@ From source using [Stack](https://docs.haskellstack.org):
 Download binary (macOS):
 
     $ DEST=~/.local/bin/gotta-go-fast
-    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.0/macos -fLo $DEST
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.1/macos -fLo $DEST
 
 Download binary (linux):
 
     $ DEST=~/.local/bin/gotta-go-fast
-    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.0/linux -fLo $DEST
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.1/linux -fLo $DEST
 
 Where `DEST` is somewhere in your `PATH`.
 
 ## Usage
 
-`gotta-go-fast` has three modes of operation. In all three modes, type through the presented text and then submit with enter. You **must** correct your mistakes before you can submit.
+`gotta-go-fast` has three modes of operation. In all three modes, type through the presented text and then submit with ENTER. You **must** correct your mistakes before you can submit. Press ESC at any time to restart.
 
 ### 1. Nonsense mode
 

@@ -79,7 +79,7 @@ config =
         help "The width at which to wrap lines (default: 80)"
     , files = def &= args &= typ "FILES"
     } &=
-  summary "Gotta Go Fast 0.3.0.0" &=
+  summary "Gotta Go Fast 0.3.0.1" &=
   help "Practice typing and measure your WPM and accuracy." &=
   program "gotta-go-fast" &=
   (details $ lines $(embedStringFile "details.txt"))
@@ -162,10 +162,14 @@ main :: IO ()
 main = do
   c <- cmdArgs config
   fs <- filterM doesFileExist $ files c
-  case fs of
-    [] -> nonsense c >>= run (fg_empty c) (fg_error c)
-    _ -> do
-      r <- randomRIO (0, length fs - 1)
-      file <- readFile $ fs !! r
-      sampled <- sample c file
-      run (fg_empty c) (fg_error c) sampled
+  loop <-
+    case fs of
+      [] -> nonsense c >>= run (fg_empty c) (fg_error c)
+      _ -> do
+        r <- randomRIO (0, length fs - 1)
+        file <- readFile $ fs !! r
+        sampled <- sample c file
+        run (fg_empty c) (fg_error c) sampled
+  if loop
+    then main
+    else return ()
