@@ -109,20 +109,27 @@ weightedRandomWord = do
       | r < f = w
       | otherwise = go (r - f) rest
 
+loopWhile :: Monad m => (a -> Bool) -> m a -> m a
+loopWhile p mx = do
+  x <- mx
+  if p x
+    then loopWhile p mx
+    else return x
+
 -- Generates nonsense which is superficially similar to English. Similar in the
 -- sense that the frequency of words in the generated text is approximately the
 -- same as the frequency of words in actual usage.
 nonsense :: Config -> IO String
 nonsense c = do
-  words <- go $ nonsense_len c
+  words <- go (nonsense_len c) Nothing
   return $ (wrap (width c) . unwords $ words) ++ "\n"
   where
-    go :: Int -> IO [String]
-    go n
+    go :: Int -> Maybe String -> IO [String]
+    go n lastWord
       | n <= 0 = return []
       | otherwise = do
-        word <- weightedRandomWord
-        rest <- go (n - length word - 1) -- extra 1 to count the space
+        word <- loopWhile ((== lastWord) . Just) weightedRandomWord
+        rest <- go (n - length word - 1) (Just word) -- extra 1 to count the space
         return $ word : rest
 
 sample :: Config -> String -> IO String
