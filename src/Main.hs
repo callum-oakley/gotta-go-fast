@@ -4,7 +4,7 @@
 
 module Main where
 
-import           Control.Monad          (filterM)
+import           Control.Monad          (filterM, when)
 import           Data.Char              (isAscii, isPrint)
 import           Data.FileEmbed         (embedStringFile)
 import           Data.List.Split        (splitOn)
@@ -82,7 +82,7 @@ config =
   summary "Gotta Go Fast 0.3.0.2" &=
   help "Practice typing and measure your WPM and accuracy." &=
   program "gotta-go-fast" &=
-  (details $ lines $(embedStringFile "details.txt"))
+  details (lines $(embedStringFile "details.txt"))
 
 wrap :: Int -> String -> String
 wrap width = T.unpack . wrapText wrapSettings width . T.pack
@@ -124,7 +124,6 @@ nonsense c = do
   words <- go (nonsense_len c) Nothing
   return $ (wrap (width c) . unwords $ words) ++ "\n"
   where
-    go :: Int -> Maybe String -> IO [String]
     go n lastWord
       | n <= 0 = return []
       | otherwise = do
@@ -141,10 +140,10 @@ sample c file =
     sampleParagraph = do
       r <- randomRIO (0, length paragraphs - 1)
       return $
-        ((if reflow_ c
-            then reflow
-            else wrap (width c)) $
-         paragraphs !! r) ++
+        (if reflow_ c
+           then reflow
+           else wrap (width c))
+          (paragraphs !! r) ++
         "\n"
     sampleLines = do
       r <- randomRIO (0, max 0 $ length (lines ascii) - height c)
@@ -155,13 +154,12 @@ sample c file =
         ((\l -> l >= min_paragraph_len c && l <= max_paragraph_len c) . length) .
       map unlines . splitOn [""] . lines $
       ascii
-    reflow s =
+    reflow =
       wrap (width c) .
       map
         (\case
            '\n' -> ' '
-           c -> c) $
-      s
+           c -> c)
     ascii = toAscii (tab c) file
     chop = unlines . take (height c) . lines
 
@@ -177,6 +175,4 @@ main = do
         file <- readFile $ fs !! r
         sampled <- sample c file
         run (fg_empty c) (fg_error c) sampled
-  if loop
-    then main
-    else return ()
+  when loop main
