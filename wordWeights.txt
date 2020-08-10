@@ -2624,7 +2624,6 @@ military	600
 choices	600
 artist	600
 William	599
-wh	599
 uhh	599
 gym	599
 cruel	599
@@ -3351,7 +3350,6 @@ writer	420
 reception	420
 pin	420
 oops	420
-gt	420
 diner	420
 annoying	420
 agents	420
@@ -6596,7 +6594,6 @@ obnoxious	152
 mates	152
 Jasper	152
 improve	152
-ii	152
 hereby	152
 gabby	152
 faked	152
@@ -7056,7 +7053,6 @@ rental	136
 prostitute	136
 premonitions	136
 physics	136
-nd	136
 monk	136
 mild	136
 jumps	136
@@ -7995,7 +7991,6 @@ por	110
 poems	110
 playin	110
 playground	110
-pd	110
 Parker's	110
 paranoia	110
 Oscar	110
@@ -9250,7 +9245,6 @@ curly	87
 cupid	87
 condolences	87
 comrade	87
-ch	87
 Cassadines	87
 bulb	87
 Brittany's	87
