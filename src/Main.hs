@@ -133,7 +133,7 @@ nonsense c = do
 
 sample :: Config -> String -> IO String
 sample c file =
-  if paragraph c
+  if paragraph c && not (null paragraphs)
     then sampleParagraph
     else sampleLines
   where
