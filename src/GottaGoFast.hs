@@ -170,14 +170,14 @@ noOfChars = length . input
 
 -- The following functions are only safe to use when both hasStarted and
 -- hasEnded hold.
-seconds :: State -> Rational
-seconds s = toRational $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
+seconds :: State -> Double
+seconds s = realToFrac $ diffUTCTime (fromJust $ end s) (fromJust $ start s)
 
 countChars :: State -> Int
 countChars = length . groupBy (\x y -> isSpace x && isSpace y) . target
 
-wpm :: State -> Rational
+wpm :: State -> Double
 wpm s = fromIntegral (countChars s) / (5 * seconds s / 60)
 
-accuracy :: State -> Rational
+accuracy :: State -> Double
 accuracy s = fromIntegral (hits s) / fromIntegral (strokes s)

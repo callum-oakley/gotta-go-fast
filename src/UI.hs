@@ -18,6 +18,7 @@ import           Data.Word              (Word8)
 import           Graphics.Vty           (Attr, Color (..), Event (..), Key (..),
                                          Modifier (..), bold, defAttr,
                                          withStyle)
+import           Text.Printf            (printf)
 
 import           GottaGoFast
 
@@ -48,8 +49,7 @@ drawText s = padBottom (Pad 2) . foldl (<=>) emptyWidget . map drawLine $ page s
 drawResults :: State -> Widget ()
 drawResults s =
   withAttr resultAttrName . str $
-  (show . round $ wpm s) ++
-  " words per minute • " ++ (show . round $ accuracy s * 100) ++ "% accuracy"
+  printf "%.f words per minute • %.1f%% accuracy" (wpm s) (accuracy s * 100)
 
 draw :: State -> [Widget ()]
 draw s
