@@ -79,7 +79,7 @@ config =
         help "The width at which to wrap lines (default: 80)"
     , files = def &= args &= typ "FILES"
     } &=
-  summary "Gotta Go Fast 0.3.0.2" &=
+  summary "Gotta Go Fast 0.3.0.3" &=
   help "Practice typing and measure your WPM and accuracy." &=
   program "gotta-go-fast" &=
   details (lines $(embedStringFile "details.txt"))
