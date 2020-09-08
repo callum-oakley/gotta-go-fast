@@ -117,12 +117,12 @@ app emptyAttr errorAttr resultAttr =
           ]
     }
 
-run :: Maybe Word8 -> Maybe Word8 -> String -> IO Bool
+run :: Word8 -> Word8 -> String -> IO Bool
 run fgEmptyCode fgErrorCode t = do
   s <- defaultMain (app emptyAttr errorAttr resultAttr) $ initialState t
   return $ loop s
   where
-    emptyAttr = fg . ISOColor $ fromMaybe 8 fgEmptyCode
-    errorAttr = flip withStyle bold . fg . ISOColor $ fromMaybe 1 fgErrorCode
+    emptyAttr = fg . ISOColor $ fgEmptyCode
+    errorAttr = flip withStyle bold . fg . ISOColor $ fgErrorCode
     -- abusing the fgErrorCode to use as a highlight colour for the results here
-    resultAttr = fg . ISOColor $ fromMaybe 1 fgErrorCode
+    resultAttr = fg . ISOColor $ fgErrorCode

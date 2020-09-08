@@ -21,8 +21,8 @@ import           UI                     (run)
 
 data Config =
   Config
-    { fg_empty          :: Maybe Word8
-    , fg_error          :: Maybe Word8
+    { fg_empty          :: Word8
+    , fg_error          :: Word8
     , files             :: [FilePath]
     , height            :: Int
     , max_paragraph_len :: Int
@@ -56,9 +56,9 @@ config :: Config
 config =
   Config
     { fg_empty =
-        def &= typ "COLOUR" &=
+        8 &= typ "COLOUR" &=
         help "The ANSI colour code for empty (not yet typed) text"
-    , fg_error = def &= typ "COLOUR" &= help "The ANSI colour code for errors"
+    , fg_error = 1 &= typ "COLOUR" &= help "The ANSI colour code for errors"
     , height =
         20 &= typ "LINES" &=
         help "The maximum number of lines to sample (default: 20)"
@@ -167,12 +167,12 @@ main :: IO ()
 main = do
   c <- cmdArgs config
   fs <- filterM doesFileExist $ files c
-  loop <-
+  target <-
     case fs of
-      [] -> nonsense c >>= run (fg_empty c) (fg_error c)
+      [] -> nonsense c
       _ -> do
         r <- randomRIO (0, length fs - 1)
         file <- readFile $ fs !! r
-        sampled <- sample c file
-        run (fg_empty c) (fg_error c) sampled
+        sample c file
+  loop <- run (fg_empty c) (fg_error c) target
   when loop main
