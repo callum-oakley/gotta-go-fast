@@ -7,7 +7,6 @@ module GottaGoFast
   , applyBackspace
   , applyBackspaceWord
   , applyChar
-  , applyWhitespace
   , atEndOfLine
   , cursor
   , countChars
@@ -99,9 +98,16 @@ applyChar c s =
         if isErrorFree s'
           then 1
           else 0
+    , strokes = strokes s + 1
     }
   where
-    s' = s {input = input s ++ [c], strokes = strokes s + 1}
+    s'
+      | isSpace c = s {input = input s ++ whitespace}
+      | otherwise = s {input = input s ++ [c]}
+    whitespace =
+      case takeWhile isSpace . drop (length $ input s) $ target s of
+        "" -> " "
+        ws -> ws
 
 applyBackspace :: State -> State
 applyBackspace s = s {input = reverse . drop n . reverse $ input s}
@@ -121,14 +127,6 @@ applyBackspaceWord s = s {input = reverse . drop n . reverse $ input s}
     toWordBeginning (x:y:ys)
       | not (isSpace x) && isSpace y = 1
       | otherwise = 1 + toWordBeginning (y : ys)
-
-applyWhitespace :: State -> State
-applyWhitespace s = s {input = input s ++ whitespace}
-  where
-    whitespace =
-      case takeWhile isSpace . drop (length $ input s) $ target s of
-        "" -> " "
-        ws -> ws
 
 initialState :: String -> State
 initialState t =

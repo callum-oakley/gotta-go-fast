@@ -60,14 +60,15 @@ draw s
 
 handleChar :: Char -> State -> EventM () (Next State)
 handleChar c s
-  | isSpace c && isComplete (applyWhitespace s) = do
+  | not $ hasStarted s = do
     now <- liftIO getCurrentTime
-    continue $ stopClock now s
-  | isSpace c = continue $ applyWhitespace s
-  | hasStarted s = continue $ applyChar c s
-  | otherwise = do
+    continue $ startClock now s'
+  | isComplete s' = do
     now <- liftIO getCurrentTime
-    continue . applyChar c $ startClock now s
+    continue $ stopClock now s'
+  | otherwise = continue s'
+  where
+    s' = applyChar c s
 
 handleEvent :: State -> BrickEvent () e -> EventM () (Next State)
 handleEvent s (VtyEvent (EvKey key [MCtrl])) =
