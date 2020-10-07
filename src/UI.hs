@@ -49,7 +49,7 @@ drawText s = padBottom (Pad 2) . foldl (<=>) emptyWidget . map drawLine $ page s
 drawResults :: State -> Widget ()
 drawResults s =
   withAttr resultAttrName . str $
-  printf "%.f words per minute • %.1f%% accuracy" (wpm s) (accuracy s * 100)
+  printf "%.f words per minute • %.f%% accuracy" (wpm s) (accuracy s * 100)
 
 draw :: State -> [Widget ()]
 draw s
