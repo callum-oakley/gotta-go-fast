@@ -7,9 +7,7 @@ accuracy. Written with [brick](https://github.com/jtdaugherty/brick).
 
 From source using [Stack](https://docs.haskellstack.org):
 
-    $ git clone https://github.com/callum-oakley/gotta-go-fast
-    $ cd gotta-go-fast
-    $ stack install
+    $ stack install gotta-go-fast
 
 Download binary (macOS):
 
