@@ -23,7 +23,7 @@ Where `DEST` is somewhere in your `PATH`.
 
 ## Usage
 
-`gotta-go-fast` has three modes of operation. In all three modes, type through the presented text and then submit with ENTER. You **must** correct your mistakes before you can submit. Press ESC at any time to restart.
+`gotta-go-fast` has three modes of operation. In all three modes, type through the presented text and then submit with ENTER. You **must** correct your mistakes before you can submit. Press ESC at any time to restart. Exit with CTRL-C.
 
 ### 1. Nonsense mode
 
