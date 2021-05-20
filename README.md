@@ -12,12 +12,7 @@ From source using [Stack](https://docs.haskellstack.org):
 Download binary (macOS):
 
     $ DEST=~/.local/bin/gotta-go-fast
-    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.1/macos -fLo $DEST
-
-Download binary (linux):
-
-    $ DEST=~/.local/bin/gotta-go-fast
-    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/v0.3.0.1/linux -fLo $DEST
+    $ curl https://github.com/callum-oakley/gotta-go-fast/releases/download/0.3.0.6/macos -fLo $DEST
 
 Where `DEST` is somewhere in your `PATH`.
 
