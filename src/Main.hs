@@ -15,7 +15,8 @@ import           System.Console.CmdArgs (Data, Typeable, args, cmdArgs, def,
                                          typ, (&=))
 import           System.Directory       (doesFileExist)
 import           System.Random          (randomRIO)
-import           Text.Wrap              (WrapSettings (..), wrapText)
+import           Text.Wrap              (WrapSettings (..), defaultWrapSettings,
+                                         wrapText)
 
 import           UI                     (run)
 
@@ -87,7 +88,7 @@ config =
 wrap :: Int -> String -> String
 wrap width = T.unpack . wrapText wrapSettings width . T.pack
 
-wrapSettings = WrapSettings {preserveIndentation = True, breakLongWords = True}
+wrapSettings = defaultWrapSettings {preserveIndentation = True, breakLongWords = True}
 
 -- wordWeights.txt is taken from
 -- https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists#TV_and_movie_scripts
