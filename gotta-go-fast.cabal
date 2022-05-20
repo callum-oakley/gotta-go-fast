@@ -1,5 +1,5 @@
 name:                gotta-go-fast
-version:             0.3.0.7
+version:             0.3.0.8
 synopsis:            A command line utility for practicing typing
 description:
   A command line utility for practicing typing and measuring your WPM and accuracy. See the project <https://github.com/callum-oakley/gotta-go-fast/blob/master/README.md README> for details.
