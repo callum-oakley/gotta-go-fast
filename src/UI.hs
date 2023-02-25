@@ -6,9 +6,9 @@ import           Brick                  (App (..), AttrName, BrickEvent (..),
                                          EventM, Location (..), Next,
                                          Padding (..), Widget, attrMap,
                                          attrName, continue, defaultMain,
-                                         emptyWidget, fg, halt, padAll,
+                                         emptyWidget, fg, halt, hBox, padAll,
                                          padBottom, showCursor, showFirstCursor,
-                                         str, withAttr, (<+>), (<=>))
+                                         str, vBox, withAttr, (<=>))
 import           Brick.Widgets.Center   (center)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.Char              (isSpace)
@@ -41,10 +41,10 @@ drawLine :: Line -> Widget ()
 -- We display an empty line as a single space so that it still occupies
 -- vertical space.
 drawLine [] = str " "
-drawLine ls = foldl1 (<+>) $ map drawCharacter ls
+drawLine ls = hBox $ map drawCharacter ls
 
 drawText :: State -> Widget ()
-drawText s = padBottom (Pad 2) . foldl (<=>) emptyWidget . map drawLine $ page s
+drawText s = padBottom (Pad 2) . vBox . map drawLine $ page s
 
 drawResults :: State -> Widget ()
 drawResults s =
